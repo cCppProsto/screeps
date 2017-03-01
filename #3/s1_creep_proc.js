@@ -28,6 +28,8 @@ const HARVESTER_STATE =
    ,HARVEST             : 2
    ,TRANSFER_TO_TARGET  : 3
    ,WAITING             : 4
+   ,MOVE_FOR_REPAIR     : 5
+   ,REPAIR_WAITING      : 6
 };
 
 //------------------------------------------------------------------------------
@@ -41,8 +43,9 @@ var   harvester_body     = [];
 
 var s1 = null;
 
-var harvester_count = 0;
-var harvester_max   = 3;
+var harvester_count  = 0;
+var harvester_max    = 6;   // !! DEPENDS ON COUNT OF SOURCES IN SPAWN ROOM: 1 source = 3 max, 2 source = 6 max, etc.
+var harvester_on_src = 3;
 
 var s1_common_energy_capacity = 0;
 var s1_common_energy          = 0;
@@ -67,18 +70,17 @@ module.exports =
             {
                 if(mem.resourceID == null)
                 {
-                    var target = creep_obj.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
-                    if(target)
-                    {
-                        mem.resourceID = target.id;
-                        
-                        mem.prev_state = mem.state;
-                        
-                        if(creep_obj.pos.inRangeTo(target, 1))
-                            mem.state  = HARVESTER_STATE.HARVEST;
-                        else
-                            mem.state  = HARVESTER_STATE.MOVE_TO_HARVEST;
-                    }
+                    mem.resourceID = s1.memory.sources[parseInt(harvester_count/harvester_on_src)];
+                    mem.prev_state = mem.state;
+                    
+                    console.log("index = " + parseInt(harvester_count/harvester_on_src) + ", source ID = " + mem.resourceID);
+                    
+                    var target = Game.getObjectById(mem.resourceID);
+                    
+                    if(creep_obj.pos.inRangeTo(target, 1))
+                        mem.state  = HARVESTER_STATE.HARVEST;
+                    else
+                        mem.state  = HARVESTER_STATE.MOVE_TO_HARVEST;
                 }                
                 break;        
             }
@@ -154,8 +156,22 @@ module.exports =
                     mem.state    = HARVESTER_STATE.TRANSFER_TO_TARGET;
                     break;
                 }
-                console.log(creep_obj.name + " is waiting...");
+                //console.log(creep_obj.name + " is waiting...");
                 break;        
+            }
+            case HARVESTER_STATE.MOVE_FOR_REPAIR:
+            {
+                if(creep_obj.pos.inRangeTo(Game.spawns.s1, 1))
+                    mem.state = HARVESTER_STATE.REPAIR_WAITING;
+                else
+                    creep_obj.moveTo(Game.spawns.s1);
+                break;    
+            }
+            case HARVESTER_STATE.REPAIR_WAITING:
+            {
+                if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
+                    creep_obj.transfer(s1, RESOURCE_ENERGY);
+                break;    
             }
         }
     },
@@ -172,6 +188,21 @@ module.exports =
                 {
                     case CREEP_ROLE.HARVESTER:
                     {
+                        /*
+                        if(cr.memory.state == HARVESTER_STATE.REPAIR_WAITING)
+                        {
+                            if(s1.renewCreep(cr) = ERR_FULL)
+                                cr.memory.state = cr.memory.prev_state;
+                        }
+                        else
+                        if((cr.memory.state != HARVESTER_STATE.MOVE_FOR_REPAIR) && (cr.ticksToLive <= 100))
+                        {
+                            console.log("prev = " + cr.memory.prev_state)
+                            cr.memory.prev_state = cr.memory.state;
+                            cr.memory.state      = HARVESTER_STATE.MOVE_FOR_REPAIR;
+                        }
+                        */
+                        
                         this.harvester_doing(cr);
                         break;
                     }
@@ -273,16 +304,59 @@ module.exports =
         }
     },
     //--------------------------------------------------------------------------
+    find_energy_sources : function()
+    {
+        var arr = [];
+        var fsrc = s1.room.find(FIND_SOURCES);
+        
+        for(var i in fsrc)
+            arr.push(fsrc[i].id);
+
+        s1.memory.sources = arr;
+        //harvester_max = fsrc.length * harvester_on_src;
+    },
+    //--------------------------------------------------------------------------
     processing : function()
     {
         s1 = Game.spawns.s1;
         
         if(!s1)
             return;
-            
+
+        if(!Game.spawns.s1.memory.sources)
+            this.find_energy_sources();
+
+
         // separate by state ?? CREATE | DOING | etc.
         
         this.check_and_create();
         this.creeps_doing();
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
