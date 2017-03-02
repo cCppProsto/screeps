@@ -113,7 +113,7 @@ module.exports =
             {
                 var storage = null;
                 
-                storage = creep_obj.pos.findClosestByRange(FIND_MY_STRUCTURES, { filter :  function(obj) 
+                storage = creep_obj.pos.findClosestByRange(FIND_STRUCTURES, { filter :  function(obj) 
                                                                                     { 
                                                                                         if(obj.structureType == STRUCTURE_STORAGE || 
                                                                                            obj.structureType == STRUCTURE_CONTAINER)
@@ -175,15 +175,17 @@ module.exports =
             }
             case BUILDER_STATE.TAKE_ENERGY:
             {
-                var storage_obj = Game.getObjectById(mem.targetID);
-                if(storage_obj.store[RESOURCE_ENERGY] == 0)
+                var storage_obj = Game.getObjectById(mem.resourceID);
+                var total = _.sum(storage_obj.store);
+
+                if(total == 0)
                 {
                     mem.prev_state = mem.state;
                     mem.state      = BUILDER_STATE.INIT;
                     break;
                 }
-                
-                storage_obj.transfer(creep_obj);
+
+                storage_obj.transfer(creep_obj, RESOURCE_ENERGY);
                 mem.prev_state = mem.state;
                 mem.state      = BUILDER_STATE.TRANSFER_TO_CONSTRUCTION;
                 break;
@@ -356,7 +358,7 @@ module.exports =
                     }
       
                     // check extensions 
-                    var res = s1.room.find(FIND_MY_STRUCTURES,
+                    var res = s1.room.find(FIND_STRUCTURES,
                                                 { filter: 
                                                     function(obj)
                                                     { 
@@ -421,7 +423,7 @@ module.exports =
                 else
                 {
                     // check extensions 
-                    var res = s1.room.find(FIND_MY_STRUCTURES,
+                    var res = s1.room.find(FIND_STRUCTURES,
                                                 { filter: 
                                                     function(obj)
                                                     { 
