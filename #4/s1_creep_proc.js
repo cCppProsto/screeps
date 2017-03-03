@@ -51,6 +51,8 @@ const BUILDER_STATE =
    ,TRANSFER_TO_CONSTRUCTION    : 5
    ,BUILDING                    : 6
    ,WAITING                     : 7
+   ,MOVE_TO_REPAIR              : 8
+   ,REPAIR                      : 9
 };
 
 const REPAIRER_STATE = 
@@ -111,14 +113,83 @@ var s1_common_energy          = 0;
 
 //------------------------------------------------------------------------------
 
-
-module.exports = 
+var stool = 
 {
     //--------------------------------------------------------------------------
+    get_obj_for_store : function()
+    {
+        var res;
+        res = s1.room.find(FIND_STRUCTURES,
+                           {filter: 
+                             function(obj)
+                             { 
+                                 if(obj.structureType == STRUCTURE_EXTENSION )
+                                     return obj.energy < obj.energyCapacity;
+                                 return false;
+                             }});
+        if(res == false)
+        {
+            res = s1.room.find(FIND_STRUCTURES,
+                               {filter: 
+                                 function(obj)
+                                 { 
+                                     if(obj.structureType == STRUCTURE_CONTAINER ||
+                                        obj.structureType == STRUCTURE_STORAGE)
+                                         return obj.store[RESOURCE_ENERGY] < obj.storeCapacity;
+                                        
+                                     return false;
+                                 }});
+        }
+        return res;
+    },
+    //--------------------------------------------------------------------------
+    get_stores : function()
+    {
+        var res;
+        res = s1.room.find(FIND_STRUCTURES, 
+                           { filter :  function(obj) 
+                            { 
+                                if(obj.structureType == STRUCTURE_STORAGE || 
+                                   obj.structureType == STRUCTURE_CONTAINER)
+                                    return obj.store[RESOURCE_ENERGY] > 0;
+                                return false;
+                            }});
+        return res;
+    },
+    //--------------------------------------------------------------------------
+    get_towers : function()
+    {
+        var res;
+        res = s1.room.find(FIND_STRUCTURES,
+                            { filter: 
+                                function(obj)
+                                { 
+                                    if(obj.structureType == STRUCTURE_TOWER)
+                                        return obj.energy < obj.energyCapacity;
+                                    return false;
+                                }
+                            });
+        return res;
+    },
     spawn_is_owner_of_creep : function(cr_name)
     {
         return (Game.creeps[cr_name].memory.spawnID == SPAWN1_ID);
     },
+    get_id_first_construction : function()
+    {
+        var res = s1.room.find(FIND_CONSTRUCTION_SITES);
+        
+        if(res.length > 0)
+            return res[0].id;
+        return null;
+    }
+}
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+module.exports = 
+{
     //--------------------------------------------------------------------------
     repairer_doing : function(creep_obj)
     {
@@ -165,21 +236,14 @@ module.exports =
         {
             case BUILDER_STATE.INIT:
             {
-                var storage = null;
+                var storages;
                 
-                storage = creep_obj.pos.findClosestByRange(FIND_STRUCTURES, { filter :  function(obj) 
-                                                                                    { 
-                                                                                        if(obj.structureType == STRUCTURE_STORAGE || 
-                                                                                           obj.structureType == STRUCTURE_CONTAINER)
-                                                                                            return obj.store[RESOURCE_ENERGY] > 0;
-                                                                                        return false;
-                                                                                    }
-                                                                        });
+                storages = stool.get_stores();
                                                                         
-                if(storage != null)
+                if(storages.length > 0)
                 {
                     mem.state       = BUILDER_STATE.MOVE_TO_STORAGE;
-                    mem.resourceID  = storage.id;
+                    mem.resourceID  = storages[0].id;
                     break;
                 }
                 
@@ -218,13 +282,16 @@ module.exports =
             {
                 var storage_obj = Game.getObjectById(mem.resourceID);
                 
+                
                 if(creep_obj.pos.inRangeTo(storage_obj, 1))
                 {
                     mem.prev_state = mem.state;
                     mem.state      = BUILDER_STATE.TAKE_ENERGY;
                 }
                 else
+                {
                     creep_obj.moveTo(storage_obj);
+                }
                 break;
             }
             case BUILDER_STATE.TAKE_ENERGY:
@@ -239,7 +306,8 @@ module.exports =
                     break;
                 }
 
-                storage_obj.transfer(creep_obj, RESOURCE_ENERGY);
+                var res;
+                res = storage_obj.transfer(creep_obj, RESOURCE_ENERGY);
                 mem.prev_state = mem.state;
                 mem.state      = BUILDER_STATE.TRANSFER_TO_CONSTRUCTION;
                 break;
@@ -247,6 +315,7 @@ module.exports =
             case BUILDER_STATE.TRANSFER_TO_CONSTRUCTION:
             {
                 var contruct_obj = Game.getObjectById(mem.targetID);
+                
                 
                 if(contruct_obj)
                 {
@@ -262,7 +331,16 @@ module.exports =
                 {
                     mem.prev_state = mem.state;
                     mem.state      = BUILDER_STATE.INIT;
-                    mem.targetID   = this.get_id_first_construction();
+                    mem.targetID   = stool.get_id_first_construction();
+                    if(mem.targetID != null)
+                    {
+                        mem.state      = BUILDER_STATE.BUILDING;
+                        break;
+                    }
+                    else
+                    {
+                        mem.state      = BUILDER_STATE.INIT;
+                    }
                 }
                 break;
             }
@@ -271,7 +349,7 @@ module.exports =
                 if(creep_obj.build(Game.getObjectById(mem.targetID)) != OK)
                 {
                     mem.prev_state = mem.state;
-                    mem.targetID   = this.get_id_first_construction();
+                    mem.targetID   = stool.get_id_first_construction();
                     if(mem.targetID != null)
                         mem.state = BUILDER_STATE.INIT;
                     else
@@ -282,13 +360,45 @@ module.exports =
             }
             case BUILDER_STATE.WAITING:
             {
+                if(s1.memory.repairObjID)
+                {
+                    mem.state = BUILDER_STATE.MOVE_TO_REPAIR;
+                    break;
+                }
+                
+                
                 if(Game.time & 0x01)
                 {
                     mem.prev_state = mem.state;
-                    mem.targetID   = this.get_id_first_construction();
+                    mem.targetID   = stool.get_id_first_construction();
                     if(mem.targetID != null)
                         mem.state = BUILDER_STATE.INIT;
-                    //console.log(Game.time)
+                }
+                break;
+            }
+            case BUILDER_STATE.MOVE_TO_REPAIR:
+            {
+                if(s1.memory.repairObjID)
+                {
+                    if(creep_obj.pos.inRangeTo(Game.getObjectById(s1.memory.repairObjID), 3))
+                    {
+                        mem.prev_state = mem.state;
+                        mem.state      = BUILDER_STATE.REPAIR;
+                    }
+                    else
+                        creep_obj.moveTo(Game.getObjectById(s1.memory.repairObjID));
+                }
+                break;
+            }
+            case BUILDER_STATE.REPAIR:
+            {
+                if(s1.memory.repairObjID)
+                {
+                    if(creep_obj.repair(Game.getObjectById(s1.memory.repairObjID)) != OK)
+                    {
+                        mem.state = BUILDER_STATE.INIT;
+                        break;
+                    }
                 }
                 break;
             }
@@ -309,8 +419,6 @@ module.exports =
                 {
                     mem.resourceID = this.get_energy_source_id();
                     mem.prev_state = mem.state;
-                    
-                    console.log("Upgrader index = " + parseInt(cl_upgrader_count/cl_upgrader_on_src) + ", source ID = " + mem.resourceID);
                     
                     var target = Game.getObjectById(mem.resourceID);
                     
@@ -374,37 +482,6 @@ module.exports =
     //--------------------------------------------------------------------------
     harvester_doing : function(creep_obj)
     {
-        var find_obj_for_store = function()
-        {
-            var res;
-            
-            res = s1.room.find(FIND_STRUCTURES,
-                                                { filter: 
-                                                    function(obj)
-                                                    { 
-                                                        if(obj.structureType == STRUCTURE_EXTENSION )
-                                                            return obj.energy < obj.energyCapacity;
-                                                        return false;
-                                                    }
-                                                });
-            if(res == false)
-            {
-                res = s1.room.find(FIND_STRUCTURES,
-                                                { filter: 
-                                                    function(obj)
-                                                    { 
-                                                        if(obj.structureType == STRUCTURE_CONTAINER ||
-                                                           obj.structureType == STRUCTURE_STORAGE)
-                                                            return obj.store[RESOURCE_ENERGY] < obj.storeCapacity;
-                                                            
-                                                        return false;
-                                                    }
-                                                });
-            }
-            
-            return res;
-        }
-        
         if(creep_obj.spawning)
             return;
             
@@ -417,8 +494,6 @@ module.exports =
                 {
                     mem.resourceID = this.get_energy_source_id();
                     mem.prev_state = mem.state;
-                    
-                    console.log("Harvester index = " + parseInt(harvester_count/harvester_on_src) + ", source ID = " + mem.resourceID);
                     
                     var target = Game.getObjectById(mem.resourceID);
                     
@@ -457,8 +532,7 @@ module.exports =
                         break;
                     }
       
-                    // check extensions 
-                    var res = find_obj_for_store();
+                    var res = stool.get_obj_for_store();
                     if(res.length > 0)
                     {
                         mem.targetID = res[0].id;
@@ -466,7 +540,6 @@ module.exports =
                         break;
                     }
                     
-                    //console.log("to waiting...")
                     mem.state = HARVESTER_STATE.WAITING;
                     break;
                 }
@@ -501,7 +574,7 @@ module.exports =
             {
                 mem.prev_state = mem.state;
                 
-                //if( Game.time & 0x01)
+                if( Game.time & 0x01)
                 {
                     if(s1.energy < s1.energyCapacity)
                     {
@@ -511,50 +584,30 @@ module.exports =
                     }
                     else
                     {
-                        // check extensions 
-                        var res = find_obj_for_store();
+                        var res = stool.get_obj_for_store();
                         if(res.length > 0)
                         {
                             mem.targetID = res[0].id;
                             mem.state    = HARVESTER_STATE.TRANSFER_TO_TARGET;
                             break;
                         }
-                        else if(!creep_obj.pos.inRangeTo(Game.spawns.s1, 2))
+                        else // check tower
+                        {
+                            var res;
+                            res = stool.get_towers();
+                            if(res.length > 0)
+                            {
+                                mem.targetID = res[0].id;
+                                mem.state    = HARVESTER_STATE.TRANSFER_TO_TARGET;
+                                break;
+                            }
+                            
+                        }
+                        if(!creep_obj.pos.inRangeTo(Game.spawns.s1, 2))
                             creep_obj.moveTo(Game.spawns.s1);
                     }
                 }
-                //console.log(creep_obj.name + " is waiting...");
                 break;        
-            }
-        }
-    },
-    //--------------------------------------------------------------------------
-    creeps_doing : function()
-    {
-        for(var i in Game.creeps)
-        {
-            if(this.spawn_is_owner_of_creep(i))
-            {
-                var cr   = Game.creeps[i];
-
-                switch(Game.creeps[i].memory.role)
-                {
-                    case CREEP_ROLE.HARVESTER:
-                    {
-                        this.harvester_doing(cr);
-                        break;
-                    }
-                    case CREEP_ROLE.CL_UPGRADER:
-                    {
-                        this.cl_upgrader_doing(cr);
-                        break;
-                    }
-                    case CREEP_ROLE.BUILDER:
-                    {
-                        this.builder_doing(cr);
-                        break;
-                    }
-                }
             }
         }
     },
@@ -624,24 +677,15 @@ module.exports =
         }
     },
     //--------------------------------------------------------------------------
-    get_id_first_construction : function()
-    {
-        var res = s1.room.find(FIND_CONSTRUCTION_SITES);
-        
-        if(res.length > 0)
-            return res[0].id;
-        return null;
-    },
-    //--------------------------------------------------------------------------
     check_and_create_builder : function()
     {
         var res = s1.room.find(FIND_CONSTRUCTION_SITES);
         
-        if(res.length > 0)
+        if((res.length > 0) || s1.memory.repairObjID)
             this.create_builder(res[0].id);
     },
     //--------------------------------------------------------------------------
-    check_and_create : function()
+    creeps_doing : function()
     {
         harvester_count   = 0;
         cl_upgrader_count = 0;
@@ -650,23 +694,26 @@ module.exports =
         
         for(var i in Game.creeps)
         {
-            if(this.spawn_is_owner_of_creep(i))
+            if(stool.spawn_is_owner_of_creep(i))
             {
                 var cr = Game.creeps[i];
                 switch(cr.memory.role)
                 {
                     case CREEP_ROLE.HARVESTER:
                     {
+                        this.harvester_doing(cr);
                         ++harvester_count;
                         break;
                     }
                     case CREEP_ROLE.CL_UPGRADER:
                     {
+                        this.cl_upgrader_doing(cr);
                         ++cl_upgrader_count;
                         break;
                     }
                     case CREEP_ROLE.BUILDER:
                     {
+                        this.builder_doing(cr);
                         ++builder_count;
                         break;
                     }
@@ -682,18 +729,25 @@ module.exports =
         if(harvester_count < harvester_max)
         {
             this.create_harvester();
+            return;
         }
-        else if(cl_upgrader_count < cl_upgrader_max)
+        
+        if(cl_upgrader_count < cl_upgrader_max)
         {
             this.create_cl_upgrader();
+            return;
         }
-        else if(builder_count < builder_max)
+        
+        if(builder_count < builder_max)
         {
            this.check_and_create_builder();
+           return;
         }
-        else if(repairer_count < repairer_max)
+        
+        if(repairer_count < repairer_max)
         {
             this.create_repairer();
+            return;
         }
     },
     //--------------------------------------------------------------------------
@@ -748,16 +802,13 @@ module.exports =
     {
         var fsrc   = s1.room.find(FIND_SOURCES);
         s1_sources = [];
-        console.log("s1_sources length = " + s1_sources.length);
 
         for(var i in fsrc)
             s1_sources.push(fsrc[i].id);
 
         s1.memory.sourceID    = 0;
         s1.memory.sourceCount = fsrc.length;
-        console.log("Find is Ok: " + s1.memory.sourceID + ", " + s1.memory.sourceCount);
-        
-        
+
         harvester_max   = s1.memory.sourceCount * harvester_on_src;
         cl_upgrader_max = s1.memory.sourceCount * cl_upgrader_on_src;
         builder_max     = s1.memory.sourceCount * builder_on_src;
@@ -767,10 +818,46 @@ module.exports =
     {
         if(s1.memory.sourceID >= s1.memory.sourceCount)
             s1.memory.sourceID = 0;
-        
-        console.log("Get ID = " + s1.memory.sourceID);
-        
         return s1_sources[s1.memory.sourceID++];
+    },
+    //--------------------------------------------------------------------------
+    find_obj_for_repair : function()
+    {
+        if(!s1.memory.repairObjID)
+        {
+            var targets = s1.room.find(FIND_STRUCTURES, 
+                            { filter: function(obj)
+                                  { 
+                                     if(obj.structureType == STRUCTURE_WALL)
+                                         return obj.hits < obj.hitsMax
+                                     return false;
+                                 }});
+            if(targets.length > 0)
+                s1.memory.repairObjID = targets[0].id;
+            else
+                s1.memory.repairObjID = null;
+        }
+        else
+        {
+            if(Game.getObjectById(s1.memory.repairObjID).hits == Game.getObjectById(s1.memory.repairObjID).hitsMax)
+                s1.memory.repairObjID = null;
+        }
+    },
+    //--------------------------------------------------------------------------
+    tower_repair : function()
+    {
+        //var targets = s1.room.find(FIND_STRUCTURES, 
+
+        if(s1.memory.repairObjID)
+        {
+            var towers = s1.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
+            for(var i in towers)
+            {
+                if(towers[i].energy > 10)
+                    towers[i].repair(Game.getObjectById(s1.memory.repairObjID));
+                //console.log(i)
+            }
+        }
     },
     //--------------------------------------------------------------------------
     processing : function()
@@ -782,12 +869,12 @@ module.exports =
 
         if(s1_sources.length == 0)
             this.find_energy_sources();
-
-        //return;
-
+            
+        this.find_obj_for_repair();
+        this.tower_repair();
+        //console.log(s1.memory.repairObjID)
         // separate by state ?? CREATE | DOING | etc.
         
-        this.check_and_create();
         this.creeps_doing();
     }
 };
