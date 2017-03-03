@@ -18,6 +18,7 @@ const CREEP_ROLE =
 {
     HARVESTER     : 0
    ,RCL_UPGRADER  : 1
+   ,BUILDER       : 2
 };
 
 
