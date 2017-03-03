@@ -525,13 +525,12 @@ var rcl_upgrader_role =
                 }
                 
                 if(mem.resourceID == null)
-                {
                     mem.resourceID = s1tool.get_source_id();
-                    if(obj.pos.inRangeTo(Game.getObjectById(mem.resourceID), 1))
-                        mem.state  = RCL_UPGRADER_STATE.HARVEST;
-                    else
-                        mem.state  = RCL_UPGRADER_STATE.TO_HARVEST;
-                }
+
+                if(obj.pos.inRangeTo(Game.getObjectById(mem.resourceID), 1))
+                    mem.state  = RCL_UPGRADER_STATE.HARVEST;
+                else
+                    mem.state  = RCL_UPGRADER_STATE.TO_HARVEST;
                 break;
             }
             case RCL_UPGRADER_STATE.TO_HARVEST:
@@ -699,7 +698,7 @@ var builder_role =
                         console.log("builder harvest result = " + res);
                     break;
                 }
-                mem.state = BUILDER_STATE.TO_UPGRADE;
+                mem.state = BUILDER_STATE.FIND_OBJ_FOR_BUILD;
                 break;
             }
             case BUILDER_STATE.TO_ENERGY:
@@ -729,9 +728,13 @@ var builder_role =
                 if(build_obj)
                 {
                     if(obj.pos.inRangeTo(build_obj, 3))
+                    {
                         mem.state = BUILDER_STATE.BUILD;
+                    }
                     else
+                    {
                         obj.moveTo(build_obj);
+                    }
                 }
                 break;
             }
@@ -740,7 +743,7 @@ var builder_role =
                 var res = obj.build(Game.getObjectById(mem.targetID));
                 if(res != OK)
                 {
-                    mem.state = BUILDER_STATE.FIND_OBJ_FOR_BUILD;
+                    mem.state = BUILDER_STATE.DOING_CALCULATE;
                     break;
                 }
                 break;
@@ -771,6 +774,7 @@ var builder_role =
             {
                 var total = _.sum(obj.carry);
                 
+                
                 if(total < obj.carryCapacity)
                 {
                     var res;
@@ -783,16 +787,16 @@ var builder_role =
                     }
                     
                     if(mem.resourceID == null)
-                    {
                         mem.resourceID = s1tool.get_source_id();
-                        if(obj.pos.inRangeTo(Game.getObjectById(mem.resourceID), 1))
-                            mem.state  = BUILDER_STATE.HARVEST;
-                        else
-                            mem.state  = BUILDER_STATE.TO_HARVEST;
-                    }
+
+                    if(obj.pos.inRangeTo(Game.getObjectById(mem.resourceID), 1))
+                        mem.state  = BUILDER_STATE.HARVEST;
+                    else
+                        mem.state  = BUILDER_STATE.TO_HARVEST;
+                    
                     break;
                 }
-                console.log(" BUILDER_STATE.DOING_CALCULATE calculating...");
+                console.log(" BUILDER_STATE.DOING_CALCULATE - 2");
                 break;
             }
             case BUILDER_STATE.FIND_OBJ_FOR_BUILD:
