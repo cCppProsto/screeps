@@ -380,14 +380,7 @@ var harvester_role =
                     break;
                 }
   
-                var res = s1tool.get_stores_for_trancfer();
-                if(res.length > 0)
-                {
-                    mem.targetID = res[0].id;
-                    mem.state    = HARVESTER_STATE.TRANCFERING;
-                    break;
-                }
-
+                var res; 
                 res = s1tool.get_towers();
                 if(res.length > 0)
                 {
@@ -402,6 +395,15 @@ var harvester_role =
                     }
                     break;
                 }
+                
+                res = s1tool.get_stores_for_trancfer();
+                if(res.length > 0)
+                {
+                    mem.targetID = res[0].id;
+                    mem.state    = HARVESTER_STATE.TRANCFERING;
+                    break;
+                }
+
                 mem.targetID = null;
                 
                 //console.log("cannot calculate transfer object...")
@@ -411,6 +413,13 @@ var harvester_role =
             case HARVESTER_STATE.TRANCFERING:
             {
                 var target = Game.getObjectById(mem.targetID);
+
+                if(!target)
+                {
+                    mem.state = HARVESTER_STATE.TRANSFER_OBJ_CALC;
+                    break;
+                }
+
                 
                 if(obj.pos.inRangeTo(target, 1))
                     mem.state = HARVESTER_STATE.TRANSFER;
@@ -433,6 +442,7 @@ var harvester_role =
                     mem.state = HARVESTER_STATE.TRANSFER_OBJ_CALC;
                     break;
                 }
+                mem.state = HARVESTER_STATE.RECALCULATE;
                 console.log(res)
                 break;
             }
@@ -560,6 +570,11 @@ var rcl_upgrader_role =
             {
                 var energy_obj = Game.getObjectById(mem.targetID);
                 
+                if(!energy_obj)
+                {
+                    mem.state = RCL_UPGRADER_STATE.RECALCULATE;
+                    break;
+                }
                 if(obj.pos.inRangeTo(energy_obj, 1))
                     mem.state = RCL_UPGRADER_STATE.GET_ENERGY;
                 else
