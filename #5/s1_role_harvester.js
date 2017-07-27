@@ -120,7 +120,8 @@ module.exports =
                   break;
                 }
             }
-            m.state = STATE.TRANSFER_CALCULATE;
+            else
+              m.state = STATE.TRANSFER_CALCULATE;
             break;
           }
           case STATE.TRANSFER_CALCULATE:
