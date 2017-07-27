@@ -16,6 +16,22 @@ var rcl_upgrader_on_src   = 3;
 var builder_count    = 0;
 var builder_max      = 4;
 
+var enemies = null;
+
+const STATE =
+{
+  PEACE     : 0
+ ,DEFFENCE  : 1
+};
+
+// GLOBAL VARIABLES
+Game.spawns.s1.memory.attach_check  = 0;
+Game.spawns.s1.memory.isAttacked    = false;
+
+Game.spawns.s1.memory.isTowersUpdate = false;
+Game.spawns.s1.memory.towers        = [];
+Game.spawns.s1.memory.state         = STATE.PEACE;
+
 const CREEP_ROLE =
 {
     HARVESTER     : 0
@@ -91,6 +107,72 @@ module.exports =
         }
     },
     //--------------------------------------------------------------------------
+    creeps_moving_to_safe_place : function()
+    {
+      var tower = null;
+      if(Game.spawns.s1.memory.towers.length > 0)
+        tower = Game.getObjectById(Game.spawns.s1.memory.towers[0]) ;
+
+      for(var i in Game.creeps)
+      {
+        if(s1_tool.is_owner_of_creep(i))
+        {
+            var cr = Game.creeps[i];
+            if(tower != null)
+              cr.moveTo(tower);
+            else
+              cr.moveTo(Game.spawns.s1);
+        }
+      }
+    },
+    //--------------------------------------------------------------------------
+    tower_processing: function()
+    {
+      for(var i in Game.spawns.s1.memory.towers)
+      {
+          var tower = Game.getObjectById(Game.spawns.s1.memory.towers[i]) ;
+
+          if(enemies == null)
+          {
+            Game.spawns.s1.memory.isAttacked = false;
+            return;
+          }
+
+          if(tower.attack(enemies[0]) != OK)
+          {
+            enemies = s1_tool.get_enemies();
+            if(enemies == null)
+              Game.spawns.s1.memory.isAttacked = false;
+          }
+      }
+    },
+    //--------------------------------------------------------------------------
+    check_attack: function()
+    {
+      if(Game.spawns.s1.memory.isAttacked == false)
+      {
+        enemies = s1_tool.get_enemies();
+        if(enemies != null) // ATTACKED!!
+        {
+          console.log("Attacked!");
+          Game.spawns.s1.memory.isAttacked = true;
+          Game.spawns.s1.memory.isTowersUpdate = true;
+        }
+      }
+
+      if(Game.spawns.s1.memory.isTowersUpdate == true)
+      {
+        Game.spawns.s1.memory.towers = [];
+
+        var res = Game.spawns.s1.room.find(FIND_STRUCTURES, {filter: { structureType: STRUCTURE_TOWER }});
+
+        for(var i in res)
+            Game.spawns.s1.memory.towers.push(res[i].id);
+
+        Game.spawns.s1.memory.isTowersUpdate = false;
+      }
+    },
+    //--------------------------------------------------------------------------
     processing : function()
     {
         s1 = Game.spawns.s1;
@@ -98,8 +180,27 @@ module.exports =
         if(!s1)
             return;
 
-        s1_tool.processing();
+        switch(Game.spawns.s1.memory.state)
+        {
+          case STATE.PEACE:
+          {
+            s1_tool.processing();
+            this.creeps_doing();
+            this.check_attack();
 
-        this.creeps_doing();
+            if(Game.spawns.s1.memory.isAttacked == true)
+              Game.spawns.s1.memory.state = STATE.DEFFENCE;
+
+            break;
+          }
+          case STATE.DEFFENCE:
+          {
+            this.creeps_moving_to_safe_place();
+            this.tower_processing();
+            if(Game.spawns.s1.memory.isAttacked == false)
+              Game.spawns.s1.memory.state = STATE.PEACE;
+            break;
+          }
+        }
     }
 };

@@ -46,22 +46,6 @@ const STATE =
    ,RECALCULATE    : 9
 };
 
-const BUILDER_STATE =
-{
-    CREATE             : 0
-   ,TO_HARVEST         : 1
-   ,HARVEST            : 2
-   ,TO_ENERGY          : 3
-   ,TAKE_ENERGY        : 4
-   ,TO_BUILD           : 5
-   ,BUILD              : 6
-   ,TO_REPAIR          : 7
-   ,REPAIR             : 8
-   ,DOING_CALCULATE    : 9
-   ,FIND_OBJ_FOR_BUILD : 10
-   ,FIND_OBJ_FOR_REPAIR: 11
-};
-
 const builder_300_body = [MOVE, WORK, CARRY, CARRY, CARRY];
 const builder_500_body = [MOVE, MOVE, WORK,  WORK, CARRY, CARRY, CARRY, CARRY];
 const builder_700_body = [MOVE, MOVE, MOVE,  MOVE, MOVE,  WORK,  WORK, CARRY, CARRY, CARRY, CARRY, CARRY];
@@ -118,6 +102,7 @@ module.exports =
           return;
 
       var m = builder.memory;
+      //console.log(m.state + " " + builder.name);
 
       switch(m.state)
       {
@@ -158,12 +143,8 @@ module.exports =
           }
 
           if(res != OK)
-          {
-            console.log("Builder(" + builder.name + ")" + " can not take energy(" + res + ")");
-            break;
-          }
-
-          m.state  = STATE.FIND_REPAIR;
+            m.state  = STATE.FIND_REPAIR;
+          
           break;
         }
         case STATE.FIND_REPAIR:
@@ -224,6 +205,10 @@ module.exports =
                   m.state = STATE.BUILD;
               else
                   builder.moveTo(build_obj);
+          }
+          else
+          {
+            m.state = STATE.FIND_BUILD;
           }
           break;
         }

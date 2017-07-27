@@ -19,18 +19,15 @@ const CREEP_ROLE =
    ,BUILDER       : 2
 };
 
-//-----------------------------  HARVESTER  ------------------------------------
-const HARVESTER_STATE =
+const STATE =
 {
-    CREATE            : 0
-   ,RECALCULATE       : 1
-   ,TO_HARVEST        : 2
-   ,HARVEST           : 3
-   ,TRANSFER_OBJ_CALC : 4
-   ,TRANCFERING       : 5
-   ,TRANSFER          : 6
-   ,RECALC_DOING      : 7
+  FIND_RESOURCE      : 0
+ ,TO_HARVEST         : 1
+ ,HARVEST            : 2
+ ,TRANSFER_CALCULATE : 3
+ ,TRANCFERING        : 4
 };
+
 const harvester_300_body = [MOVE, WORK, WORK,  CARRY];
 const harvester_500_body = [MOVE, WORK, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY];
 const harvester_700_body = [MOVE, MOVE, MOVE, WORK, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
@@ -72,7 +69,7 @@ module.exports =
         {
             Game.spawns.s1.createCreep(harvester_body, null,
                                               { role       : CREEP_ROLE.HARVESTER
-                                               ,state      : HARVESTER_STATE.CREATE
+                                               ,state      : STATE.FIND_RESOURCE
                                                ,targetID   : null
                                                ,resourceID : null
                                                ,spawnID    : SPAWN1_ID
@@ -80,137 +77,120 @@ module.exports =
         }
     },
     //------------------------------------------------------------------------------
-    doing : function(obj)
+    doing : function(harvester)
     {
-        if(obj.spawning)
+        if(harvester.spawning)
             return;
 
-        var mem = obj.memory;
+        var m = harvester.memory;
 
-        switch(mem.state)
+        switch(m.state)
         {
-            case HARVESTER_STATE.CREATE:
-            {
-                if(mem.resourceID == null)
-                {
-                    mem.resourceID = s1_tool.get_source_id();
+          case STATE.FIND_RESOURCE:
+          {
+            m.resourceID = s1_tool.get_source_id();
 
-                    if(obj.pos.inRangeTo(Game.getObjectById(mem.resourceID), 1))
-                        mem.state  = HARVESTER_STATE.HARVEST;
-                    else
-                        mem.state  = HARVESTER_STATE.TO_HARVEST;
-                    break;
+            if(harvester.pos.inRangeTo(Game.getObjectById(m.resourceID), 1))
+                m.state  = STATE.HARVEST;
+            else
+                m.state  = STATE.TO_HARVEST;
+            break;
+          }
+          case STATE.TO_HARVEST:
+          {
+            var source_obj = Game.getObjectById(m.resourceID);
+
+            if(harvester.pos.inRangeTo(source_obj, 1))
+                m.state = STATE.HARVEST;
+            else
+                harvester.moveTo(source_obj);
+            break;
+          }
+          case STATE.HARVEST:
+          {
+            var total = _.sum(harvester.carry);
+
+            if(total < harvester.carryCapacity)
+            {
+                var res = harvester.harvest(Game.getObjectById(m.resourceID));
+
+                if(res == ERR_NOT_ENOUGH_RESOURCES)
+                {
+                  console.log("harvest : ERR_NOT_ENOUGH_RESOURCES");
+                  break;
                 }
+            }
+            m.state = STATE.TRANSFER_CALCULATE;
+            break;
+          }
+          case STATE.TRANSFER_CALCULATE:
+          {
+            if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
+            {
+                m.targetID = Game.spawns.s1.id;
+                m.state    = STATE.TRANCFERING;
                 break;
             }
-            case HARVESTER_STATE.RECALCULATE:
+
+            var res;
+            res = s1_tool.get_towers();
+            if(res.length > 0)
             {
-                var total = _.sum(obj.carry);
-                if(total == 0)
+                for(var i in res)
                 {
-                    mem.state    = HARVESTER_STATE.TO_HARVEST;
-                    break;
-                }
-
-                mem.state = HARVESTER_STATE.TRANSFER_OBJ_CALC
-                break;
-            }
-            case HARVESTER_STATE.TO_HARVEST:
-            {
-                var source_obj = Game.getObjectById(mem.resourceID);
-
-                if(obj.pos.inRangeTo(source_obj, 1))
-                    mem.state = HARVESTER_STATE.HARVEST;
-                else
-                    obj.moveTo(source_obj);
-                break;
-            }
-            case HARVESTER_STATE.HARVEST:
-            {
-                var total = _.sum(obj.carry);
-
-                if(total < obj.carryCapacity)
-                {
-                    var res = obj.harvest(Game.getObjectById(mem.resourceID));
-
-                    if(res != OK)
-                        console.log("harvest result = " + res);
-                    break;
-                }
-                mem.state = HARVESTER_STATE.TRANSFER_OBJ_CALC;
-                break;
-            }
-            case HARVESTER_STATE.TRANSFER_OBJ_CALC:
-            {
-                if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
-                {
-                    mem.targetID = Game.spawns.s1.id;
-                    mem.state    = HARVESTER_STATE.TRANCFERING;
-                    break;
-                }
-
-                var res;
-                res = s1_tool.get_towers();
-                if(res.length > 0)
-                {
-                    for(var i in res)
+                    if(res[i].energy < res[i].energyCapacity)
                     {
-                        if(res[i].energy < res[i].energyCapacity)
-                        {
-                            mem.targetID = res[0].id;
-                            mem.state    = HARVESTER_STATE.TRANCFERING;
-                            break;
-                        }
+                        m.targetID = res[0].id;
+                        m.state    = STATE.TRANCFERING;
+                        break;
                     }
-                    break;
                 }
-
-                res = s1_tool.get_stores_for_trancfer();
-                if(res.length > 0)
-                {
-                    mem.targetID = res[0].id;
-                    mem.state    = HARVESTER_STATE.TRANCFERING;
-                    break;
-                }
-
-                mem.targetID = null;
                 break;
             }
-            case HARVESTER_STATE.TRANCFERING:
+
+            res = s1_tool.get_stores_for_trancfer();
+            if(res.length > 0)
             {
-                var target = Game.getObjectById(mem.targetID);
-
-                if(!target)
-                {
-                    mem.state = HARVESTER_STATE.TRANSFER_OBJ_CALC;
-                    break;
-                }
-
-                if(obj.pos.inRangeTo(target, 1))
-                    mem.state = HARVESTER_STATE.TRANSFER;
-                else
-                    obj.moveTo(target);
+                m.targetID = res[0].id;
+                m.state    = STATE.TRANCFERING;
                 break;
             }
-            case HARVESTER_STATE.TRANSFER:
+
+            console.log("harvest : Can not find object for transfer");
+            m.targetID = null;
+            break;
+          }
+          case STATE.TRANCFERING:
+          {
+            var target = Game.getObjectById(m.targetID);
+
+            if(!target)
             {
-                var target = Game.getObjectById(mem.targetID);
-                var res = obj.transfer(target, RESOURCE_ENERGY);
+                m.state = STATE.TO_HARVEST;
+                break;
+            }
+
+            if(harvester.pos.inRangeTo(target, 1))
+            {
+                var res = harvester.transfer(target, RESOURCE_ENERGY);
                 if(res == OK)
                 {
-                    mem.state = HARVESTER_STATE.RECALCULATE;
+                    m.state = STATE.TO_HARVEST;
                     break;
                 }
 
                 if(res == ERR_FULL)
                 {
-                    mem.state = HARVESTER_STATE.TRANSFER_OBJ_CALC;
+                    m.state = STATE.TRANSFER_CALCULATE;
                     break;
                 }
-                mem.state = HARVESTER_STATE.RECALCULATE;
-                console.log(res)
+                console.log("harvest : transfer error + " + res);
                 break;
             }
+            else
+                harvester.moveTo(target);
+            break;
+          }
         }
     }
 };

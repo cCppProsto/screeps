@@ -184,5 +184,22 @@ module.exports =
     {
         if(s1_sources.length == 0)
             this.find_energy_sources();
+    },
+    //--------------------------------------------------------------------------
+    get_enemies : function()
+    {
+      if(Game.spawns.s1.memory.attach_check == 6)
+      {
+        var enemy_targets = Game.spawns.s1.room.find(FIND_HOSTILE_CREEPS);
+        if(enemy_targets.length > 0)
+            return enemy_targets;
+        else
+            return null;
+        Game.spawns.s1.memory.attach_check = 0;
+      }
+      else
+        Game.spawns.s1.memory.attach_check++;
+
+      return null;
     }
 };

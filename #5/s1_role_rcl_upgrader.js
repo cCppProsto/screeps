@@ -28,19 +28,6 @@ const STATE =
  ,UPGRADE       : 4
 };
 
-//-----------------------------  RCL_UPGRADER  ---------------------------------
-const RCL_UPGRADER_STATE =
-{
-    CREATE            : 0
-   ,RECALCULATE       : 1
-   ,TO_HARVEST        : 2
-   ,HARVEST           : 3
-   ,TO_ENERGY         : 4
-   ,GET_ENERGY        : 5
-   ,TO_UPGRADE        : 6
-   ,UPGRADE           : 7
-};
-
 const rcl_upgrader_300_body = [MOVE, WORK, CARRY, CARRY, CARRY];
 const rcl_upgrader_500_body = [MOVE, MOVE, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
 const rcl_upgrader_700_body = [MOVE, MOVE, MOVE,  MOVE, MOVE,  WORK,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
@@ -95,7 +82,6 @@ module.exports =
           return;
 
       var m = upgrader.memory;
-
       switch(m.state)
       {
         case STATE.FIND_RESOURCE:
@@ -125,7 +111,8 @@ module.exports =
           {
               var res = upgrader.harvest(Game.getObjectById(m.resourceID));
               if(res != OK)
-                console.log("Upgrader(" + upgrader.name + ")" + " can not harvest resource(" + res + ")");
+                m.state = STATE.FIND_RESOURCE;
+                
               break;
           }
           m.state = STATE.TO_UPGRADE;
@@ -145,14 +132,12 @@ module.exports =
         case STATE.UPGRADE:
         {
           var res = upgrader.upgradeController(Game.spawns.s1.room.controller);
-          if(res == ERR_NOT_ENOUGH_RESOURCES)
+          if(res != OK)
           {
               m.state  = STATE.FIND_RESOURCE;
               break;
           }
 
-          if(res != OK)
-            console.log("Upgrader(" + upgrader.name + ")" + " can not upgrade(" + res + ")");
           break;
         }
       }

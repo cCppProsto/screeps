@@ -1,23 +1,29 @@
-var s1 = require('s1_creep_proc');
+var s1      = require('s1_creep_proc');
+var s1_tool = require('s1_tool');
 
 var enemy_targets = [];
 
+
 module.exports.loop = function()
 {
-    //var startCpu = Game.cpu.getUsed();
-
     s1.processing();
+
+    //s1_tool.calc_energy();
+    //console.log(s1_tool.get_energy_capacity());
+
+    //Game.spawns.s1.memory.isAttack = 1;
+
+/*
 
     if(!Game.spawns.s1.memory.isAttack)
     {
         if(!Game.spawns.s1.memory.attackCheck)
             Game.spawns.s1.memory.attackCheck = 0;
 
-
         if(Game.spawns.s1.memory.attackCheck == 0)
         {
             Game.spawns.s1.memory.tower = [];
-            //console.log(1)
+
             //Game.spawns.s1.memory.tower = null;
             if(!Game.spawns.s1.memory.tower)
             {
@@ -42,6 +48,7 @@ module.exports.loop = function()
 
     if(Game.spawns.s1.memory.isAttack)
     {
+        console.log(12);
         enemy_targets = Game.spawns.s1.room.find(FIND_HOSTILE_CREEPS);
         if(enemy_targets.length == 0)
         {
@@ -56,6 +63,7 @@ module.exports.loop = function()
             tower.attack(enemy_targets[0]);
         }
     }
+    */
     return;
 
     //var elapsed = Game.cpu.getUsed() - startCpu;
