@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------
 const SPAWN1_ID = 1;
 
 var s1                 = null;
@@ -279,40 +279,21 @@ module.exports =
       return s1_energy;
     },
     //--------------------------------------------------------------------------
-    get_repair_objects: function()
+    get_build_object_id : function()
     {
-        var res;
+      if(Game.spawns.s1.memory.construction_roads.length > 0)
+      {
+        console.log("obj for build find - road : " + Game.spawns.s1.memory.construction_roads);
+        return Game.spawns.s1.memory.construction_roads[0];
+      }
 
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter :
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_TOWER)
-                                    return obj.hits < obj.hitsMax;
-                                return false;
-                            }});
+      if(Game.spawns.s1.memory.construction_walls.length > 0)
+      {
+        console.log("obj for build find - wall : " + Game.spawns.s1.memory.construction_walls);
+        return Game.spawns.s1.memory.construction_walls[0];
+      }
 
-        if(res.length != 0)
-          return res;
-
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter :
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_CONTAINER)
-                                    return obj.hits < (obj.hitsMax / 2);
-                                return false;
-                            }});
-
-        if(res.length != 0)
-          return res;
-
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter :
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_WALL)
-                                    return obj.hits < (obj.hitsMax / 2);
-                                return false;
-                            }});
-        return res;
+      return "";
     },
     //--------------------------------------------------------------------------
     get_build_objects : function()
@@ -341,108 +322,99 @@ module.exports =
     {
       if(Game.spawns.s1.memory.structure_walls.length > 0)
       {
-        console.log("obj repair for builder find - wall : " + Game.spawns.s1.memory.structure_walls);
         return Game.spawns.s1.memory.structure_walls;
       }
+
+      console.log("obj repair for builder not find");
 
       return [];
     },
     //--------------------------------------------------------------------------
-    get_stores_with_count_energy : function(energyCount)
+    get_store_with_max_energy : function()
     {
-        var res;
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter:
-                             function(obj)
-                             {
-                                 if(obj.structureType == STRUCTURE_CONTAINER || obj.structureType == STRUCTURE_STORAGE)
-                                     return obj.store[RESOURCE_ENERGY] > energyCount;
-
-                                 if(obj.structureType == STRUCTURE_STORAGE || obj.structureType == STRUCTURE_STORAGE)
-                                     return obj.store[RESOURCE_ENERGY] > energyCount;
-
-                                 if(obj.structureType == STRUCTURE_EXTENSION)
-                                    return obj.energy > 0;
-                                 return false;
-                             }});
-        return res;
-    },
-    //--------------------------------------------------------------------------
-    get_stores_for_trancfer : function()
-    {
-        var res;
-
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter:
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_TOWER)
-                                    return obj.energy < obj.energyCapacity;
-                                return false;
-                            }});
-
-        if(res == false)
+      var max = 0;
+      var tmp = 0;
+      var id = "";
+      for(var i in Game.spawns.s1.memory.structure_extensions)
+      {
+        tmp = Game.getObjectById(Game.spawns.s1.memory.structure_extensions[i])[RESOURCE_ENERGY];
+        if(tmp > max)
         {
-          res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter:
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_EXTENSION)
-                                    return obj.energy < obj.energyCapacity;
-                                return false;
-                            }});
+          max = tmp;
+          id = Game.spawns.s1.memory.structure_extensions[i];
         }
+      }
 
-        if(res == false)
+      for(var i in Game.spawns.s1.memory.structure_containers)
+      {
+        tmp = Game.getObjectById(Game.spawns.s1.memory.structure_containers[i])[RESOURCE_ENERGY];
+        if(tmp > max)
         {
-            res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter:
-                                 function(obj)
-                                 {
-                                     if(obj.structureType == STRUCTURE_CONTAINER ||
-                                        obj.structureType == STRUCTURE_STORAGE)
-                                         return obj.store[RESOURCE_ENERGY] < obj.storeCapacity;
-                                     return false;
-                                 }});
+          max = tmp;
+          id = Game.spawns.s1.memory.structure_containers[i];
         }
-        return res;
+      }
+
+      for(var i in Game.spawns.s1.memory.structure_storages)
+      {
+        tmp = Game.getObjectById(Game.spawns.s1.memory.structure_storages[i]).store[RESOURCE_ENERGY];
+        if(tmp > max)
+        {
+          max = tmp;
+          id = Game.spawns.s1.memory.structure_storages[i];
+        }
+      }
+      if(id.length == 0)
+        console.log("get_store_with_max_energy: NOT FOUND");
+      return id;
     },
     //--------------------------------------------------------------------------
-    get_not_empty_stores : function()
+    get_store_id_for_trancfer_for_harvester : function()
     {
-        var res;
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter :
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_STORAGE ||
-                                   obj.structureType == STRUCTURE_CONTAINER)
-                                    return obj.store[RESOURCE_ENERGY] > 0;
-                                return false;
-                            }});
-        return res;
+      var id = "";
+      for(var i in Game.spawns.s1.memory.structure_extensions)
+      {
+        id = Game.spawns.s1.memory.structure_extensions[i];
+        var obj = Game.getObjectById(id);
+        if(obj.energy < obj.energyCapacity )
+          return id;
+      }
+
+      id = "";
+      for(var i in Game.spawns.s1.memory.structure_storages)
+      {
+        id = Game.spawns.s1.memory.structure_storages[i];
+        var obj = Game.getObjectById(id);
+        if(obj.store[RESOURCE_ENERGY] < obj.storeCapacity)
+          return id;
+      }
+
+      id = "";
+      for(var i in Game.spawns.s1.memory.structure_containers)
+      {
+        id = Game.spawns.s1.memory.structure_containers[i];
+        var obj = Game.getObjectById(id);
+        if(obj.store[RESOURCE_ENERGY] < obj.storeCapacity)
+          return id;
+      }
+      console.log("Not found store for transfering for harvester");
+      return id;
     },
     //--------------------------------------------------------------------------
-    get_towers : function()
+    get_tower_id_with_not_full_energy : function()
     {
-        var res;
-        res = Game.spawns.s1.room.find(FIND_STRUCTURES, { filter:
-                            function(obj)
-                            {
-                                if(obj.structureType == STRUCTURE_TOWER)
-                                    return obj.energy < obj.energyCapacity;
-                                return false;
-                            }});
-        return res;
+      for(var i in Game.spawns.s1.memory.structure_towers)
+      {
+        var tmp = Game.spawns.s1.memory.structure_towers[i];
+        if(Game.spawns.s1.memory.structure_towers[i].energy < Game.spawns.s1.memory.structure_towers[i].energyCapacity)
+          return tmp;
+      }
+      return "";
     },
     //--------------------------------------------------------------------------
     is_owner_of_creep : function(cr_name)
     {
         return (Game.creeps[cr_name].memory.spawnID == SPAWN1_ID);
-    },
-    //--------------------------------------------------------------------------
-    get_first_construction_id : function()
-    {
-        var res = Game.spawns.s1.room.find(FIND_CONSTRUCTION_SITES);
-
-        if(res.length > 0)
-            return res[0].id;
-        return null;
     },
     //--------------------------------------------------------------------------
     calc_energy : function()
@@ -452,16 +424,12 @@ module.exports =
         s1_energy            += Game.spawns.s1.energy;
         s1_energy_capacity   += Game.spawns.s1.energyCapacity;
 
-        var extensions = Game.spawns.s1.room.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_EXTENSION }});
-
-        if(extensions.length > 0)
+        for(var i in Game.spawns.s1.memory.structure_extensions)
         {
-            for(var i in extensions)
-            {
-                s1_energy            += extensions[i].energy;
-                s1_energy_capacity   += extensions[i].energyCapacity;
-            }
+          s1_energy += Game.getObjectById(Game.spawns.s1.memory.structure_extensions[i]).energy;
+          s1_energy_capacity+= Game.getObjectById(Game.spawns.s1.memory.structure_extensions[i]).energyCapacity;
         }
+        console.log("energy = " + s1_energy + ", capacity = " + s1_energy_capacity);
     },
     //--------------------------------------------------------------------------
     get_source_id : function()

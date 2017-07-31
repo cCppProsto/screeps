@@ -111,13 +111,13 @@ module.exports =
       {
         case STATE.FIND_RESOURCE:
         {
-          var res;
+          var storeID;
 
-          res = s1_tool.get_stores_with_count_energy(builder.carryCapacity);
+          storeID = s1_tool.get_store_with_max_energy();
 
-          if(res.length > 0)
+          if(storeID.length > 0)
           {
-              m.targetID = res[0].id;
+              m.targetID = storeID;
               m.state    = STATE.TO_ENERGY;
               break;
           }
@@ -146,9 +146,17 @@ module.exports =
               break;
           }
 
-          if(res != OK)
+          if(res == ERR_FULL)
+          {
             m.state  = STATE.FIND_BUILD;
+            break;
+          }
 
+          if(res != OK)
+          {
+            console.log("Builder(" + builder.name + "):[TAKE_ENERGY] error - " + res);
+            m.state  = STATE.FIND_BUILD;
+          }
           break;
         }
         case STATE.FIND_REPAIR:
@@ -191,15 +199,19 @@ module.exports =
           }
 
           if(res != OK)
-              m.state = STATE.RECALCULATE;
+          {
+            console.log("Builder(" + builder.name + "):[REPAIR] error - " + res);
+            m.state = STATE.RECALCULATE;
+          }
           break;
         }
         case STATE.FIND_BUILD:
         {
-          var res = s1_tool.get_build_objects();
+          var res = s1_tool.get_build_object_id();
           if(res.length > 0)
           {
-              m.targetID = res[0];
+
+              m.targetID = res;
               m.state    = STATE.TO_BUILD;
               break;
           }
@@ -233,7 +245,6 @@ module.exports =
           }
           if(res == ERR_INVALID_TARGET) // build is done
           {
-            console.log("Build - " + m.targetID + ", res = " + res);
             m.state = STATE.FIND_BUILD;
             s1_tool.recalculate_objects_for_build();
             break;
@@ -242,7 +253,7 @@ module.exports =
           if(res != OK)
           {
               m.state = STATE.RECALCULATE;
-              console.log("Build res = " + res);
+              console.log("Builder(" + builder.name + "):[BUILD] error - " + res);
           }
           break;
         }
@@ -279,7 +290,10 @@ module.exports =
           {
               var res = builder.harvest(Game.getObjectById(m.resourceID));
               if(res != OK)
+              {
+                console.log("Builder(" + builder.name + "):[HARVEST] error - " + res);
                 m.state = STATE.RECALCULATE;
+              }
           }
           else
             m.state = STATE.RECALCULATE;

@@ -98,7 +98,7 @@ module.exports =
                 return;
             }
 
-            res = s1_tool.get_repair_objects();
+            res = s1_tool.get_repair_objects_for_builder();
             if(res.length > 0)
             {
                 builder_role.create();
