@@ -83,6 +83,7 @@ module.exports =
         {
             var res;
 
+            console.log("builder_count < builder_max");
             s1_tool.recalculate_objects();
 
             res = s1_tool.get_build_object_id();
@@ -164,8 +165,9 @@ module.exports =
         if(!s1)
             return;
 
-        if (Game.spawns.s1.memory.objForBuildIsRecalc == true)
+        if (Game.spawns.s1.memory.structuresIsRecalc == true)
         {
+          console.log("Game.spawns.s1.memory.objForBuildIsRecalc == true");
           s1_tool.recalculate_objects();
         }
 

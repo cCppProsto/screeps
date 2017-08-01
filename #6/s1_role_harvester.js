@@ -158,7 +158,7 @@ module.exports =
                 break;
             }
 
-            console.log("Harvester(" + harvester.name + "):[TRANSFER_CALCULATE] error - " + res);
+            console.log("Harvester(" + harvester.name + "):[TRANSFER_CALCULATE] error");
             m.targetID = null;
             break;
           }

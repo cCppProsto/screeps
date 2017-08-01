@@ -246,6 +246,7 @@ module.exports =
           if(res == ERR_INVALID_TARGET) // build is done
           {
             m.state = STATE.FIND_BUILD;
+            console.log("Build is done!");
             s1_tool.recalculate_objects();
             break;
           }
