@@ -185,6 +185,7 @@ module.exports =
           else
           {
               console.log("S1-BUILDER-STATE.TO_REPAIR - Error!")
+              m.state = STATE.RECALCULATE;
           }
           break;
         }
@@ -210,7 +211,6 @@ module.exports =
           var res = s1_tool.get_build_object_id();
           if(res.length > 0)
           {
-
               m.targetID = res;
               m.state    = STATE.TO_BUILD;
               break;

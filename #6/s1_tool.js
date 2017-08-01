@@ -6,7 +6,7 @@ var s1_sources         = [];
 var s1_energy_capacity = 0;
 var s1_energy          = 0;
 
-var WALL_HITS_AMOUNT = 1000000;
+var WALL_HITS_AMOUNT = 200000; // 200k
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 //------------------------------------------------------------------------------
 
