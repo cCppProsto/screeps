@@ -161,10 +161,10 @@ module.exports =
         }
         case STATE.FIND_REPAIR:
         {
-          var res = s1_tool.get_repair_objects_for_builder();
-          if(res.length > 0)
+          var repair_obj_id = s1_tool.get_repair_object_id_for_builder();
+          if(repair_obj_id.length > 0)
           {
-              m.targetID = res[0];
+              m.targetID = repair_obj_id;
               m.state    = STATE.TO_REPAIR;
               break;
           }
@@ -246,7 +246,7 @@ module.exports =
           if(res == ERR_INVALID_TARGET) // build is done
           {
             m.state = STATE.FIND_BUILD;
-            s1_tool.recalculate_objects_for_build();
+            s1_tool.recalculate_objects();
             break;
           }
 

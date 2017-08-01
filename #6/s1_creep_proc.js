@@ -1,20 +1,15 @@
-var builder_role   = require('s1_role_builder');
-var harvester_role = require('s1_role_harvester');
+var builder_role      = require('s1_role_builder');
+var harvester_role    = require('s1_role_harvester');
 var rcl_upgrader_role = require('s1_role_rcl_upgrader');
-var s1_tool    = require('s1_tool');
+var s1_tool           = require('s1_tool');
 
 //------------------------------------------------------------------------------
-
 var harvester_count    = 0;
-var harvester_max      = 6;  // !! DEPENDS ON COUNT OF SOURCES IN SPAWN ROOM: 1 source = 3 max, 2 source = 6 max, etc.
-var harvester_on_src   = 3;
-
-var rcl_upgrader_count    = 0;
-var rcl_upgrader_max      = 6;  // !! DEPENDS ON COUNT OF SOURCES IN SPAWN ROOM: 1 source = 3 max, 2 source = 6 max, etc.
-var rcl_upgrader_on_src   = 3;
-
-var builder_count    = 0;
-var builder_max      = 4;
+var harvester_max      = 6;
+var rcl_upgrader_count = 0;
+var rcl_upgrader_max   = 6;
+var builder_count      = 0;
+var builder_max        = 4;
 
 var enemies = null;
 
@@ -27,11 +22,7 @@ const STATE =
 // GLOBAL VARIABLES
 Game.spawns.s1.memory.attach_check  = 0;
 Game.spawns.s1.memory.isAttacked    = false;
-
-Game.spawns.s1.memory.isTowersUpdate = false;
-Game.spawns.s1.memory.towers        = [];
 Game.spawns.s1.memory.state         = STATE.PEACE;
-
 
 const CREEP_ROLE =
 {
@@ -91,14 +82,17 @@ module.exports =
         if(builder_count < builder_max)
         {
             var res;
-            res = s1_tool.get_build_objects();
+
+            s1_tool.recalculate_objects();
+
+            res = s1_tool.get_build_object_id();
             if(res.length > 0)
             {
                 builder_role.create();
                 return;
             }
 
-            res = s1_tool.get_repair_objects_for_builder();
+            res = s1_tool.get_repair_object_id_for_builder();
             if(res.length > 0)
             {
                 builder_role.create();
@@ -110,9 +104,10 @@ module.exports =
     //--------------------------------------------------------------------------
     creeps_moving_to_safe_place : function()
     {
+      var towers = s1_tool.get_towers();
       var tower = null;
-      if(Game.spawns.s1.memory.towers.length > 0)
-        tower = Game.getObjectById(Game.spawns.s1.memory.towers[0]) ;
+      if(tower.length > 0)
+        tower = Game.getObjectById(towers[0]) ;
 
       for(var i in Game.creeps)
       {
@@ -129,9 +124,10 @@ module.exports =
     //--------------------------------------------------------------------------
     tower_processing: function()
     {
-      for(var i in Game.spawns.s1.memory.towers)
+      var towers = s1_tool.get_towers();
+      for(var i in towers)
       {
-          var tower = Game.getObjectById(Game.spawns.s1.memory.towers[i]) ;
+          var tower = Game.getObjectById(towers[i]) ;
 
           if(enemies == null)
           {
@@ -157,20 +153,7 @@ module.exports =
         {
           console.log("Attacked!");
           Game.spawns.s1.memory.isAttacked = true;
-          Game.spawns.s1.memory.isTowersUpdate = true;
         }
-      }
-
-      if(Game.spawns.s1.memory.isTowersUpdate == true)
-      {
-        Game.spawns.s1.memory.towers = [];
-
-        var res = Game.spawns.s1.room.find(FIND_STRUCTURES, {filter: { structureType: STRUCTURE_TOWER }});
-
-        for(var i in res)
-            Game.spawns.s1.memory.towers.push(res[i].id);
-
-        Game.spawns.s1.memory.isTowersUpdate = false;
       }
     },
     //--------------------------------------------------------------------------
@@ -183,8 +166,7 @@ module.exports =
 
         if (Game.spawns.s1.memory.objForBuildIsRecalc == true)
         {
-          s1_tool.recalculate_objects_for_build();
-          s1_tool.recalculate_objects_for_repair();
+          s1_tool.recalculate_objects();
         }
 
         switch(Game.spawns.s1.memory.state)

@@ -133,13 +133,6 @@ module.exports =
           }
           case STATE.TRANSFER_CALCULATE:
           {
-            if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
-            {
-                m.targetID = Game.spawns.s1.id;
-                m.state    = STATE.TRANCFERING;
-                break;
-            }
-
             var tower_id;
             tower_id = s1_tool.get_tower_id_with_not_full_energy();
             if(tower_id.length > 0)
@@ -147,6 +140,13 @@ module.exports =
               m.targetID = tower_id;
               m.state    = STATE.TRANCFERING;
               break;
+            }
+
+            if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
+            {
+                m.targetID = Game.spawns.s1.id;
+                m.state    = STATE.TRANCFERING;
+                break;
             }
 
             var store_id = "";

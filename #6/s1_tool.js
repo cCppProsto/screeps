@@ -5,6 +5,8 @@ var s1                 = null;
 var s1_sources         = [];
 var s1_energy_capacity = 0;
 var s1_energy          = 0;
+
+var WALL_HITS_AMOUNT = 1000000;
 //------------------------------------------------------------------------------
 
 Game.spawns.s1.memory.objForBuildIsRecalc = true;
@@ -43,10 +45,28 @@ Game.spawns.s1.memory.structure_walls = [];
 Game.spawns.s1.memory.structure_extensions = [];
 Game.spawns.s1.memory.structure_extractors = [];
 
+Game.spawns.s1.memory.repaire_towers = [];
+Game.spawns.s1.memory.repaire_storages = [];
+Game.spawns.s1.memory.repaire_extractors = [];
+Game.spawns.s1.memory.repaire_extensions = [];
+Game.spawns.s1.memory.repaire_spawns = [];
+Game.spawns.s1.memory.repaire_containers = [];
+Game.spawns.s1.memory.repaire_controllers = [];
+Game.spawns.s1.memory.repaire_labs = [];
+Game.spawns.s1.memory.repaire_links = [];
+Game.spawns.s1.memory.repaire_nukers = [];
+Game.spawns.s1.memory.repaire_observers = [];
+Game.spawns.s1.memory.repaire_power_spawns = [];
+Game.spawns.s1.memory.repaire_ramparts = [];
+Game.spawns.s1.memory.repaire_terminals = [];
+Game.spawns.s1.memory.repaire_walls = [];
+Game.spawns.s1.memory.repaire_roads = [];
+
 //------------------------------------------------------------------------------
 module.exports =
 {
-    recalculate_objects_for_build : function()
+    //--------------------------------------------------------------------------
+    clear_objects : function()
     {
       Game.spawns.s1.memory.construction_containers = [];
       Game.spawns.s1.memory.construction_controllers = [];
@@ -64,6 +84,163 @@ module.exports =
       Game.spawns.s1.memory.construction_walls = [];
       Game.spawns.s1.memory.construction_extensions = [];
       Game.spawns.s1.memory.construction_extractors = [];
+
+      Game.spawns.s1.memory.structure_containers = [];
+      Game.spawns.s1.memory.structure_controllers = [];
+      Game.spawns.s1.memory.structure_labs = [];
+      Game.spawns.s1.memory.structure_links = [];
+      Game.spawns.s1.memory.structure_nukers = [];
+      Game.spawns.s1.memory.structure_observers = [];
+      Game.spawns.s1.memory.structure_power_spawns = [];
+      Game.spawns.s1.memory.structure_ramparts = [];
+      Game.spawns.s1.memory.structure_roads = [];
+      Game.spawns.s1.memory.structure_spawns = [];
+      Game.spawns.s1.memory.structure_storages = [];
+      Game.spawns.s1.memory.structure_terminals = [];
+      Game.spawns.s1.memory.structure_towers = [];
+      Game.spawns.s1.memory.structure_walls = [];
+      Game.spawns.s1.memory.structure_extensions = [];
+      Game.spawns.s1.memory.structure_extractors = [];
+
+      Game.spawns.s1.memory.repaire_towers = [];
+      Game.spawns.s1.memory.repaire_storages = [];
+      Game.spawns.s1.memory.repaire_extractors = [];
+      Game.spawns.s1.memory.repaire_extensions = [];
+      Game.spawns.s1.memory.repaire_spawns = [];
+      Game.spawns.s1.memory.repaire_containers = [];
+      Game.spawns.s1.memory.repaire_controllers = [];
+      Game.spawns.s1.memory.repaire_labs = [];
+      Game.spawns.s1.memory.repaire_links = [];
+      Game.spawns.s1.memory.repaire_nukers = [];
+      Game.spawns.s1.memory.repaire_observers = [];
+      Game.spawns.s1.memory.repaire_power_spawns = [];
+      Game.spawns.s1.memory.repaire_ramparts = [];
+      Game.spawns.s1.memory.repaire_terminals = [];
+      Game.spawns.s1.memory.repaire_walls = [];
+      Game.spawns.s1.memory.repaire_roads = [];
+    },
+    //--------------------------------------------------------------------------
+    recalculate_objects : function()
+    {
+      console.log("recalculating...");
+      this.clear_objects();
+      var res = Game.spawns.s1.room.find(FIND_STRUCTURES);
+      for (var i in res)
+      {
+        if(res[i].structureType == 'constructedWall')
+        {
+          Game.spawns.s1.memory.structure_walls.push(res[i].id);
+          //if(res[i].hits < res[i].hitsMax)
+          if(res[i].hits < WALL_HITS_AMOUNT)
+            Game.spawns.s1.memory.repaire_walls.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'spawn')
+        {
+          Game.spawns.s1.memory.structure_spawns.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_spawns.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'extension')
+        {
+          Game.spawns.s1.memory.structure_extensions.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_extensions.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'rampart')
+        {
+          Game.spawns.s1.memory.structure_ramparts.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_ramparts.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'link')
+        {
+          Game.spawns.s1.memory.structure_links.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_links.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'storage')
+        {
+          Game.spawns.s1.memory.structure_storages.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_storages.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'tower')
+        {
+          Game.spawns.s1.memory.structure_towers.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_towers.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'observer')
+        {
+          Game.spawns.s1.memory.structure_observers.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_observers.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'powerSpawn')
+        {
+          Game.spawns.s1.memory.structure_power_spawns.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_power_spawns.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'extractor')
+        {
+          Game.spawns.s1.memory.structure_extractors.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_extractors.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'lab')
+        {
+          Game.spawns.s1.memory.structure_labs.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_labs.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'terminal')
+        {
+          Game.spawns.s1.memory.structure_terminals.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_terminals.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'container')
+        {
+          Game.spawns.s1.memory.structure_containers.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_containers.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'nuker')
+        {
+          Game.spawns.s1.memory.structure_nukers.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_nukers.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'road')
+        {
+          Game.spawns.s1.memory.structure_roads.push(res[i].id);
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_roads.push(res[i].id);
+          continue;
+        }
+        if(res[i].structureType == 'controller')
+        {
+          if(res[i].hits < res[i].hitsMax)
+            Game.spawns.s1.memory.repaire_controllers.push(res[i].id);
+          continue;
+        }
+        console.log("recalculate_objects_for_repair : UNKNOWN " +  res[i].structureType);
+      }
 
       var res = Game.spawns.s1.room.find(FIND_CONSTRUCTION_SITES);
       for (var i in res)
@@ -145,123 +322,12 @@ module.exports =
         }
         console.log("recalculate_objects_for_build : UNKNOWN " +  res[i].structureType);
       }
-      console.log("objects for build recalculate is Done!");
-      console.log(Game.spawns.s1.memory.construction_roads.length + " : roads");
-      console.log(Game.spawns.s1.memory.construction_walls.length + " : walls");
-
       Game.spawns.s1.memory.objForBuildIsRecalc = false;
     },
     //--------------------------------------------------------------------------
-    recalculate_objects_for_repair : function()
+    get_towers : function()
     {
-      Game.spawns.s1.memory.structure_containers = [];
-      Game.spawns.s1.memory.structure_controllers = [];
-      Game.spawns.s1.memory.structure_labs = [];
-      Game.spawns.s1.memory.structure_links = [];
-      Game.spawns.s1.memory.structure_nukers = [];
-      Game.spawns.s1.memory.structure_observers = [];
-      Game.spawns.s1.memory.structure_power_spawns = [];
-      Game.spawns.s1.memory.structure_ramparts = [];
-      Game.spawns.s1.memory.structure_roads = [];
-      Game.spawns.s1.memory.structure_spawns = [];
-      Game.spawns.s1.memory.structure_storages = [];
-      Game.spawns.s1.memory.structure_terminals = [];
-      Game.spawns.s1.memory.structure_towers = [];
-      Game.spawns.s1.memory.structure_walls = [];
-      Game.spawns.s1.memory.structure_extensions = [];
-      Game.spawns.s1.memory.structure_extractors = [];
-
-      var res = Game.spawns.s1.room.find(FIND_STRUCTURES);
-      for (var i in res)
-      {
-        if(res[i].structureType == 'constructedWall')
-        {
-          Game.spawns.s1.memory.structure_walls.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'spawn')
-        {
-          Game.spawns.s1.memory.structure_spawns.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'extension')
-        {
-          Game.spawns.s1.memory.structure_extensions.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'rampart')
-        {
-          Game.spawns.s1.memory.structure_ramparts.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'link')
-        {
-          Game.spawns.s1.memory.structure_links.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'storage')
-        {
-          Game.spawns.s1.memory.structure_storages.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'tower')
-        {
-          Game.spawns.s1.memory.structure_towers.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'observer')
-        {
-          Game.spawns.s1.memory.structure_observers.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'powerSpawn')
-        {
-          Game.spawns.s1.memory.structure_power_spawns.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'extractor')
-        {
-          Game.spawns.s1.memory.structure_extractors.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'lab')
-        {
-          Game.spawns.s1.memory.structure_labs.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'terminal')
-        {
-          Game.spawns.s1.memory.structure_terminals.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'container')
-        {
-          Game.spawns.s1.memory.structure_containers.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'nuker')
-        {
-          Game.spawns.s1.memory.structure_nukers.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'road')
-        {
-          Game.spawns.s1.memory.structure_roads.push(res[i].id);
-          continue;
-        }
-        if(res[i].structureType == 'controller')
-        {
-          Game.spawns.s1.memory.structure_controllers.push(res[i].id);
-          continue;
-        }
-        console.log("recalculate_objects_for_repair : UNKNOWN " +  res[i].structureType);
-      }
-      console.log("objects for repair recalculate is Done!");
-      console.log(Game.spawns.s1.memory.structure_roads.length + " : roads");
-      console.log(Game.spawns.s1.memory.structure_walls.length + " : walls");
-      console.log(Game.spawns.s1.memory.structure_controllers.length + " : controllers");
-
-      Game.spawns.s1.memory.objForBuildIsRecalc = false;
+      return Game.spawns.s1.memory.construction_towers;
     },
     //--------------------------------------------------------------------------
     get_sources: function()
@@ -281,53 +347,104 @@ module.exports =
     //--------------------------------------------------------------------------
     get_build_object_id : function()
     {
+      if(Game.spawns.s1.memory.construction_towers.length > 0)
+        return Game.spawns.s1.memory.construction_towers[0];
+
+      if(Game.spawns.s1.memory.construction_extensions.length > 0)
+        return Game.spawns.s1.memory.construction_extensions[0];
+
+      if(Game.spawns.s1.memory.construction_storages.length > 0)
+        return Game.spawns.s1.memory.construction_storages[0];
+
       if(Game.spawns.s1.memory.construction_roads.length > 0)
-      {
-        console.log("obj for build find - road : " + Game.spawns.s1.memory.construction_roads);
         return Game.spawns.s1.memory.construction_roads[0];
-      }
+
+      if(Game.spawns.s1.memory.construction_spawns.length > 0)
+        return Game.spawns.s1.memory.construction_spawns[0];
+
+      if(Game.spawns.s1.memory.construction_containers.length > 0)
+        return Game.spawns.s1.memory.construction_containers[0];
+
+      if(Game.spawns.s1.memory.construction_controllers.length > 0)
+        return Game.spawns.s1.memory.construction_controllers[0];
+
+      if(Game.spawns.s1.memory.construction_labs.length > 0)
+        return Game.spawns.s1.memory.construction_labs[0];
+
+      if(Game.spawns.s1.memory.construction_links.length > 0)
+        return Game.spawns.s1.memory.construction_links[0];
+
+      if(Game.spawns.s1.memory.construction_nukers.length > 0)
+        return Game.spawns.s1.memory.construction_nukers[0];
+
+      if(Game.spawns.s1.memory.construction_observers.length > 0)
+        return Game.spawns.s1.memory.construction_observers[0];
+
+      if(Game.spawns.s1.memory.construction_power_spawns.length > 0)
+        return Game.spawns.s1.memory.construction_power_spawns[0];
+
+      if(Game.spawns.s1.memory.construction_ramparts.length > 0)
+        return Game.spawns.s1.memory.construction_ramparts[0];
+
+      if(Game.spawns.s1.memory.construction_terminals.length > 0)
+        return Game.spawns.s1.memory.construction_terminals[0];
+
+      if(Game.spawns.s1.memory.construction_extractors.length > 0)
+        return Game.spawns.s1.memory.construction_extractors[0];
 
       if(Game.spawns.s1.memory.construction_walls.length > 0)
-      {
-        console.log("obj for build find - wall : " + Game.spawns.s1.memory.construction_walls);
         return Game.spawns.s1.memory.construction_walls[0];
-      }
 
       return "";
     },
     //--------------------------------------------------------------------------
-    get_build_objects : function()
+    get_repair_object_id_for_builder : function()
     {
-      if(Game.spawns.s1.memory.construction_roads.length > 0)
-      {
-        console.log("obj for build find - road : " + Game.spawns.s1.memory.construction_roads);
-        return Game.spawns.s1.memory.construction_roads;
-      }
+      if(Game.spawns.s1.memory.repaire_walls.length > 0)
+        return Game.spawns.s1.memory.repaire_walls[0];
 
-      if(Game.spawns.s1.memory.construction_walls.length > 0)
-      {
-        console.log("obj for build find - wall : " + Game.spawns.s1.memory.construction_walls);
-        return Game.spawns.s1.memory.construction_walls;
-      }
+      if(Game.spawns.s1.memory.repaire_towers.length > 0)
+        return Game.spawns.s1.memory.repaire_towers[0];
 
-      return [];
-    },
-    //--------------------------------------------------------------------------
-    get_repair_objects_for_upgrader : function()
-    {
+      if(Game.spawns.s1.memory.repaire_roads.length > 0)
+        return Game.spawns.s1.memory.repaire_roads[0];
 
-    },
-    //--------------------------------------------------------------------------
-    get_repair_objects_for_builder : function()
-    {
-      if(Game.spawns.s1.memory.structure_walls.length > 0)
-      {
-        return Game.spawns.s1.memory.structure_walls;
-      }
+      if(Game.spawns.s1.memory.repaire_storages.length > 0)
+        return Game.spawns.s1.memory.repaire_storages[0];
+
+      if(Game.spawns.s1.memory.repaire_containers.length > 0)
+        return Game.spawns.s1.memory.repaire_containers[0];
+
+      if(Game.spawns.s1.memory.repaire_labs.length > 0)
+        return Game.spawns.s1.memory.repaire_labs[0];
+
+      if(Game.spawns.s1.memory.repaire_links.length > 0)
+        return Game.spawns.s1.memory.repaire_links[0];
+
+      if(Game.spawns.s1.memory.repaire_nukers.length > 0)
+        return Game.spawns.s1.memory.repaire_nukers[0];
+
+      if(Game.spawns.s1.memory.repaire_observers.length > 0)
+        return Game.spawns.s1.memory.repaire_observers[0];
+
+      if(Game.spawns.s1.memory.repaire_power_spawns.length > 0)
+        return Game.spawns.s1.memory.repaire_power_spawns[0];
+
+      if(Game.spawns.s1.memory.repaire_ramparts.length > 0)
+        return Game.spawns.s1.memory.repaire_ramparts[0];
+
+      if(Game.spawns.s1.memory.repaire_terminals.length > 0)
+        return Game.spawns.s1.memory.repaire_terminals[0];
+
+      if(Game.spawns.s1.memory.repaire_extensions.length > 0)
+        return Game.spawns.s1.memory.repaire_extensions[0];
+
+      if(Game.spawns.s1.memory.repaire_extractors.length > 0)
+        return Game.spawns.s1.memory.repaire_extractors[0];
 
       console.log("obj repair for builder not find");
 
-      return [];
+      return "";
     },
     //--------------------------------------------------------------------------
     get_store_with_max_energy : function()
@@ -405,9 +522,10 @@ module.exports =
     {
       for(var i in Game.spawns.s1.memory.structure_towers)
       {
-        var tmp = Game.spawns.s1.memory.structure_towers[i];
-        if(Game.spawns.s1.memory.structure_towers[i].energy < Game.spawns.s1.memory.structure_towers[i].energyCapacity)
-          return tmp;
+        var id = Game.spawns.s1.memory.structure_towers[i];
+        var obj = Game.getObjectById(id);
+        if(obj.energy < obj.energyCapacity)
+          return id;
       }
       return "";
     },
@@ -429,7 +547,7 @@ module.exports =
           s1_energy += Game.getObjectById(Game.spawns.s1.memory.structure_extensions[i]).energy;
           s1_energy_capacity+= Game.getObjectById(Game.spawns.s1.memory.structure_extensions[i]).energyCapacity;
         }
-        console.log("energy = " + s1_energy + ", capacity = " + s1_energy_capacity);
+        //console.log("energy = " + s1_energy + ", capacity = " + s1_energy_capacity);
     },
     //--------------------------------------------------------------------------
     get_source_id : function()
