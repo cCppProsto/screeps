@@ -66,6 +66,10 @@ Game.spawns.s1.memory.repaire_roads = [];
 //------------------------------------------------------------------------------
 module.exports =
 {
+    get_wall_hits_amount: function()
+    {
+      return WALL_HITS_AMOUNT;
+    },
     //--------------------------------------------------------------------------
     clear_objects : function()
     {

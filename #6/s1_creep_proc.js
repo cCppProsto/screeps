@@ -83,9 +83,6 @@ module.exports =
         {
             var res;
 
-            console.log("builder_count < builder_max");
-            s1_tool.recalculate_objects();
-
             res = s1_tool.get_build_object_id();
             if(res.length > 0)
             {
@@ -107,7 +104,7 @@ module.exports =
     {
       var towers = s1_tool.get_towers();
       var tower = null;
-      if(tower.length > 0)
+      if(towers.length > 0)
         tower = Game.getObjectById(towers[0]) ;
 
       for(var i in Game.creeps)
@@ -126,6 +123,7 @@ module.exports =
     tower_processing: function()
     {
       var towers = s1_tool.get_towers();
+      enemies = s1_tool.get_enemies();
       for(var i in towers)
       {
           var tower = Game.getObjectById(towers[i]) ;
@@ -137,11 +135,7 @@ module.exports =
           }
 
           if(tower.attack(enemies[0]) != OK)
-          {
-            enemies = s1_tool.get_enemies();
-            if(enemies == null)
-              Game.spawns.s1.memory.isAttacked = false;
-          }
+            Game.spawns.s1.memory.isAttacked = false;
       }
     },
     //--------------------------------------------------------------------------

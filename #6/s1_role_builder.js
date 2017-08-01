@@ -88,14 +88,17 @@ module.exports =
 
         if(builder_body.length > 0)
         {
-            Game.spawns.s1.createCreep(builder_body,
-                                       null,
-                                      { role       : CREEP_ROLE.BUILDER
-                                       ,state      : STATE.FIND_RESOURCE
-                                       ,targetID   : null
-                                       ,resourceID : null
-                                       ,spawnID    : SPAWN1_ID
-                                      });
+          console.log("builder creating...");
+          s1_tool.recalculate_objects();
+
+          Game.spawns.s1.createCreep(builder_body,
+                                     null,
+                                    { role       : CREEP_ROLE.BUILDER
+                                     ,state      : STATE.FIND_RESOURCE
+                                     ,targetID   : null
+                                     ,resourceID : null
+                                     ,spawnID    : SPAWN1_ID
+                                    });
         }
     },
     //------------------------------------------------------------------------------
@@ -191,7 +194,17 @@ module.exports =
         }
         case STATE.REPAIR:
         {
-          var res = builder.repair(Game.getObjectById(m.targetID));
+          var repairObj = Game.getObjectById(m.targetID);
+          var res = builder.repair(repairObj);
+          if(repairObj.structureType == 'constructedWall')
+          {
+            if(repairObj.hits >= s1_tool.get_wall_hits_amount())
+            {
+              m.state = STATE.FIND_REPAIR;
+              s1_tool.recalculate_objects();
+              break;
+            }
+          }
 
           if(res == ERR_NOT_ENOUGH_RESOURCES)
           {
@@ -297,7 +310,7 @@ module.exports =
               }
           }
           else
-            m.state = STATE.RECALCULATE;
+            m.state = STATE.FIND_BUILD;
           break;
         }
       }
