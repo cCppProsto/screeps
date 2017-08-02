@@ -10,6 +10,7 @@ var WALL_HITS_AMOUNT = 200000; // 200k
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 //------------------------------------------------------------------------------
 
+
 Game.spawns.s1.memory.structuresIsRecalc = true;
 
 Game.spawns.s1.memory.construction_containers = [];
@@ -286,7 +287,7 @@ module.exports =
     //--------------------------------------------------------------------------
     get_towers : function()
     {
-      return Game.spawns.s1.memory.construction_towers;
+      return Game.spawns.s1.memory.structure_towers;
     },
     //--------------------------------------------------------------------------
     get_sources: function()

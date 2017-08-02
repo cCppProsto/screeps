@@ -127,7 +127,6 @@ module.exports =
       for(var i in towers)
       {
           var tower = Game.getObjectById(towers[i]) ;
-
           if(enemies == null)
           {
             Game.spawns.s1.memory.isAttacked = false;
