@@ -10,7 +10,6 @@ HEAL            250
 CLAIM           600
 TOUGH           10
 */
-
 const SPAWN1_ID = 1;
 
 const CREEP_ROLE =

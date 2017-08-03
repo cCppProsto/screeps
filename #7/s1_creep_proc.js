@@ -2,7 +2,6 @@ var builder_role      = require('s1_role_builder');
 var harvester_role    = require('s1_role_harvester');
 var rcl_upgrader_role = require('s1_role_rcl_upgrader');
 var s1_tool           = require('s1_tool');
-
 //------------------------------------------------------------------------------
 var harvester_count    = 0;
 var harvester_max      = 6;
