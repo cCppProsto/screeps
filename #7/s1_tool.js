@@ -134,7 +134,8 @@ module.exports =
         return;
       Game.spawns.s1.memory.objectsRecalcLastTick = Game.time;
 
-      console.log("recalculating...");
+      //console.log("recalculating...");
+      
       this.clear_objects();
       var res = Game.spawns.s1.room.find(FIND_STRUCTURES);
       for (var i in res)

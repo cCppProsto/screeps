@@ -190,7 +190,7 @@ module.exports =
 
     if((Game.time - Game.spawns.s1.memory.objectsRecalcLastTick) > Game.spawns.s1.memory.objectsRecalcNecessarilyTick)
     {
-      console.log("Necessarily recalculated");
+      //console.log("Necessarily recalculated");
       s1_tool.recalculate_objects();
     }
 

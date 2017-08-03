@@ -80,7 +80,7 @@ module.exports =
   upgrader_move_to : function(upgrader, target)
   {
     if(upgrader.fatigue == 0)
-      upgrader.moveTo(target, {reusePath: 50});
+      upgrader.moveTo(target, {reusePath: 30});
   },
   //----------------------------------------------------------------------------
   doing : function(upgrader)

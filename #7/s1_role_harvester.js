@@ -80,7 +80,7 @@ module.exports =
   harvester_move_to : function(harvester, target)
   {
     if(harvester.fatigue == 0)
-      harvester.moveTo(target, {reusePath: 50});
+      harvester.moveTo(target, {reusePath: 30});
   },
   //------------------------------------------------------------------------------
   doing : function(harvester)
@@ -123,13 +123,13 @@ module.exports =
 
           if(res == ERR_NOT_ENOUGH_RESOURCES)
           {
-            console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
+            //console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
             break;
           }
           if(res != OK)
           {
             m.state = STATE.FIND_RESOURCE;
-            console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
+            //console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
             break;
           }
         }
@@ -181,8 +181,16 @@ module.exports =
         if(harvester.pos.inRangeTo(target, 1))
         {
           var res = harvester.transfer(target, RESOURCE_ENERGY);
+
           if(res == OK)
           {
+            var total = _.sum(harvester.carry);
+            if(total > 50)
+            {
+              m.state = STATE.TRANSFER_CALCULATE;
+              break;
+            }
+
             m.state = STATE.TO_HARVEST;
             break;
           }
@@ -192,6 +200,13 @@ module.exports =
             m.state = STATE.TRANSFER_CALCULATE;
             break;
           }
+
+          if(res == ERR_NOT_ENOUGH_RESOURCES)
+          {
+            m.state = STATE.TO_HARVEST;
+            break;
+          }
+
           console.log("Harvester(" + harvester.name + "):[TRANCFERING] error - " + res);
           break;
         }
