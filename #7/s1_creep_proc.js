@@ -1,12 +1,18 @@
-var builder_role      = require('s1_role_builder');
-var harvester_role    = require('s1_role_harvester');
-var rcl_upgrader_role = require('s1_role_rcl_upgrader');
-var s1_tool           = require('s1_tool');
+var builder_role           = require('s1_role_builder');
+var harvester_role         = require('s1_role_harvester');
+var mineral_harvester_role = require('s1_role_mineral_harvester');
+var rcl_upgrader_role      = require('s1_role_rcl_upgrader');
+var s1_tool                = require('s1_tool');
 //------------------------------------------------------------------------------
 var harvester_count    = 0;
 var harvester_max      = 6;
+
+var mineral_harvester_count = 0;
+var mineral_harvester_max   = 1;
+
 var rcl_upgrader_count = 0;
 var rcl_upgrader_max   = 6;
+
 var builder_count      = 0;
 var builder_max        = 4;
 
@@ -25,9 +31,10 @@ Game.spawns.s1.memory.state         = STATE.PEACE;
 
 const CREEP_ROLE =
 {
-  HARVESTER     : 0
- ,RCL_UPGRADER  : 1
- ,BUILDER       : 2
+  HARVESTER         : 0
+ ,RCL_UPGRADER      : 1
+ ,BUILDER           : 2
+ ,MINERAL_HARVESTER : 3
 };
 
 module.exports =
@@ -38,6 +45,7 @@ module.exports =
     harvester_count    = 0;
     rcl_upgrader_count = 0;
     builder_count      = 0;
+    mineral_harvester_count = 0;
 
     for(var i in Game.creeps)
     {
@@ -64,10 +72,33 @@ module.exports =
             ++builder_count;
             break;
           }
+          case CREEP_ROLE.MINERAL_HARVESTER:
+          {
+            mineral_harvester_role.doing(cr);
+            ++mineral_harvester_count;
+            break;
+          }
         }
       }
     }
 
+    if(mineral_harvester_count < mineral_harvester_max)
+    {
+      var extractorID = s1_tool.get_extractor_id();
+      if(extractorID.length > 0)
+      {
+        if(Game.spawns.s1.memory.mineralMineID.length > 0)
+        {
+          var mineral_obj = Game.getObjectById(Game.spawns.s1.memory.mineralMineID);
+          if(mineral_obj.mineralAmount > 0)
+          {
+            mineral_harvester_role.create();
+            return;
+          }
+        }
+      }
+      //harvester_role.create();
+    }
     if(harvester_count < harvester_max)
     {
       harvester_role.create();

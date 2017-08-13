@@ -21,17 +21,17 @@ const CREEP_ROLE =
 
 const STATE =
 {
-  FIND_RESOURCE      : 0
+  FIND_MINERALS      : 0
  ,TO_HARVEST         : 1
  ,HARVEST            : 2
  ,TRANSFER_CALCULATE : 3
  ,TRANCFERING        : 4
 };
 
-const harvester_300_body = [MOVE, WORK, WORK,  CARRY];
-const harvester_500_body = [MOVE, WORK, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY];
-const harvester_700_body = [MOVE, MOVE, MOVE, WORK, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
-var   harvester_body     = [];
+const harvester_550_body  = [MOVE, WORK, WORK,  WORK, WORK, CARRY, CARRY];
+const harvester_750_body  = [MOVE, WORK, WORK, WORK,  WORK, WORK, WORK, CARRY, CARRY ];
+const harvester_1050_body = [MOVE, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY];
+var   harvester_body      = [];
 
 //------------------------------------------------------------------------------
 module.exports =
@@ -41,19 +41,19 @@ module.exports =
       s1_tool.calc_energy();
 
       harvester_body     = [];
-      if(s1_tool.get_energy() >= 700)
+      if(s1_tool.get_energy() >= 1050)
       {
-        harvester_body   = harvester_700_body;
+        harvester_body   = harvester_1050_body;
         return;
       }
-      if(s1_tool.get_energy() >= 500)
+      if(s1_tool.get_energy() >= 750)
       {
-        harvester_body   = harvester_500_body;
+        harvester_body   = harvester_750_body;
         return;
       }
-      if(s1_tool.get_energy() >= 300)
+      if(s1_tool.get_energy() >= 550)
       {
-        harvester_body   = harvester_300_body;
+        harvester_body   = harvester_550_body;
         return;
       }
   },
@@ -68,8 +68,8 @@ module.exports =
     if(harvester_body.length > 0)
     {
       Game.spawns.s1.createCreep(harvester_body, null,
-                                        { role       : CREEP_ROLE.HARVESTER
-                                         ,state      : STATE.FIND_RESOURCE
+                                        { role       : CREEP_ROLE.MINERAL_HARVESTER
+                                         ,state      : STATE.FIND_MINERALS
                                          ,targetID   : null
                                          ,resourceID : null
                                          ,spawnID    : SPAWN1_ID
@@ -93,9 +93,9 @@ module.exports =
 
     switch(m.state)
     {
-      case STATE.FIND_RESOURCE:
+      case STATE.FIND_MINERALS:
       {
-        m.resourceID = s1_tool.get_source_id();
+        m.resourceID = Game.spawns.s1.memory.mineralMineID;//s1_tool.get_source_id();
 
         if(harvester.pos.inRangeTo(Game.getObjectById(m.resourceID), 1))
             m.state  = STATE.HARVEST;
@@ -128,7 +128,7 @@ module.exports =
           }
           if(res != OK)
           {
-            m.state = STATE.FIND_RESOURCE;
+            m.state = STATE.FIND_MINERALS;
             //console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
             break;
           }
@@ -139,32 +139,16 @@ module.exports =
       }
       case STATE.TRANSFER_CALCULATE:
       {
-        var tower_id;
-        tower_id = s1_tool.get_tower_id_with_not_full_energy();
-        if(tower_id.length > 0)
+        var storage_id;
+        storage_id = s1_tool.get_storage_id();
+        if(storage_id.length > 0)
         {
-          m.targetID = tower_id;
+          m.targetID = storage_id;
           m.state    = STATE.TRANCFERING;
           break;
         }
 
-        if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
-        {
-          m.targetID = Game.spawns.s1.id;
-          m.state    = STATE.TRANCFERING;
-          break;
-        }
-
-        var store_id = "";
-        store_id = s1_tool.get_store_id_for_trancfer_for_harvester();
-        if(store_id.length > 0)
-        {
-          m.targetID = store_id;
-          m.state    = STATE.TRANCFERING;
-          break;
-        }
-
-        console.log("Harvester(" + harvester.name + "):[TRANSFER_CALCULATE] error");
+        console.log("Mineral Harvester(" + harvester.name + "):[TRANSFER_CALCULATE] error");
         m.targetID = null;
         break;
       }
@@ -180,17 +164,12 @@ module.exports =
 
         if(harvester.pos.inRangeTo(target, 1))
         {
-          var res = harvester.transfer(target, RESOURCE_ENERGY);
+          var res;
+          for(const resourceType in harvester.carry)
+            res = harvester.transfer(target, resourceType);
 
           if(res == OK)
           {
-            var total = _.sum(harvester.carry);
-            if(total > 50)
-            {
-              m.state = STATE.TRANSFER_CALCULATE;
-              break;
-            }
-
             m.state = STATE.TO_HARVEST;
             break;
           }
@@ -207,7 +186,7 @@ module.exports =
             break;
           }
 
-          console.log("Harvester(" + harvester.name + "):[TRANCFERING] error - " + res);
+          console.log("Mineral Harvester(" + harvester.name + "):[TRANCFERING] error - " + res);
           break;
         }
         else

@@ -65,6 +65,9 @@ Game.spawns.s1.memory.repaire_terminals = [];
 Game.spawns.s1.memory.repaire_walls = [];
 Game.spawns.s1.memory.repaire_roads = [];
 
+Game.spawns.s1.memory.mineralMineID = "";
+
+
 //------------------------------------------------------------------------------
 module.exports =
 {
@@ -125,6 +128,8 @@ module.exports =
       Game.spawns.s1.memory.repaire_terminals = [];
       Game.spawns.s1.memory.repaire_walls = [];
       Game.spawns.s1.memory.repaire_roads = [];
+
+      Game.spawns.s1.memory.mineralMineID = "";
     },
     //--------------------------------------------------------------------------
     recalculate_objects : function()
@@ -133,9 +138,14 @@ module.exports =
         return;
       Game.spawns.s1.memory.objectsRecalcLastTick = Game.time;
 
-      //console.log("recalculating...");
-      
+
       this.clear_objects();
+
+      var minerals = Game.spawns.s1.room.find(FIND_MINERALS);
+      if(minerals.length > 0)
+        Game.spawns.s1.memory.mineralMineID = minerals[0].id;
+        //console.log(id + ": " + mobj.mineralType + " = " + mobj.mineralAmount);
+
       var res = Game.spawns.s1.room.find(FIND_STRUCTURES);
       for (var i in res)
       {
@@ -333,6 +343,12 @@ module.exports =
       return "";
     },
     //--------------------------------------------------------------------------
+    get_extractor_id : function()
+    {
+      if(Game.spawns.s1.memory.structure_extractors.length > 0)    return Game.spawns.s1.memory.structure_extractors[0];
+      return "";
+    },
+    //--------------------------------------------------------------------------
     get_repair_object_id_for_builder : function()
     {
       if(Game.spawns.s1.memory.repaire_towers.length > 0)       return Game.spawns.s1.memory.repaire_towers[0];
@@ -364,6 +380,13 @@ module.exports =
             return Game.spawns.s1.memory.repaire_roads[i];
         }
       }
+      return "";
+    },
+    //--------------------------------------------------------------------------
+    get_storage_id : function()
+    {
+      if(Game.spawns.s1.memory.structure_storages.length > 0)
+        return Game.spawns.s1.memory.structure_storages[0];
       return "";
     },
     //--------------------------------------------------------------------------
