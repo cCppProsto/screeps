@@ -123,6 +123,7 @@ module.exports =
       res = s1_tool.get_repair_object_id_for_builder();
       if(res.length > 0)
       {
+        //console.log(res);
         builder_role.create();
         return;
       }
@@ -167,6 +168,9 @@ module.exports =
         }
         case '1':
         {
+          var id = s1_tool.get_repair_container_id();
+          if(id.length > 0)
+            tower.repair(Game.getObjectById(id));
           //console.log("Tower[" + i + "] - " + tower.id);
           break;
         }

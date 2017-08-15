@@ -6,7 +6,7 @@ var s1_sources         = [];
 var s1_energy_capacity = 0;
 var s1_energy          = 0;
 
-var WALL_HITS_AMOUNT = 200000; // 200k
+var WALL_HITS_AMOUNT = 300000; // 200k
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 //------------------------------------------------------------------------------
 Game.spawns.s1.memory.objectsRecalcLastTick = 0;
@@ -366,6 +366,20 @@ module.exports =
       //if(Game.spawns.s1.memory.repaire_extensions.length > 0)   return Game.spawns.s1.memory.repaire_extensions[0];
       //if(Game.spawns.s1.memory.repaire_extractors.length > 0)   return Game.spawns.s1.memory.repaire_extractors[0];
       //console.log("obj repair for builder not find");
+      return "";
+    },
+    //--------------------------------------------------------------------------
+    get_repair_container_id : function()
+    {
+      if(Game.spawns.s1.memory.repaire_containers.length > 0)
+      {
+        for(var i in Game.spawns.s1.memory.repaire_containers)
+        {
+          var container = Game.getObjectById(Game.spawns.s1.memory.repaire_containers[i]);
+          if(container.hits < container.hitsMax)
+            return Game.spawns.s1.memory.repaire_containers[i];
+        }
+      }
       return "";
     },
     //--------------------------------------------------------------------------

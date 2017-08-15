@@ -114,7 +114,6 @@ module.exports =
           return;
       var m = builder.memory;
       //console.log(m.state + " " + builder.name);
-
       switch(m.state)
       {
         case STATE.FIND_RESOURCE:
