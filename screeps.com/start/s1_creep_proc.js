@@ -211,17 +211,12 @@ module.exports =
   //--------------------------------------------------------------------------
   processing : function()
   {
-    if(!Game.spawns.s1)
-      return;
-
     s1_tool.recalculate_objects();
 
     switch(Game.spawns.s1.memory.state)
     {
       case STATE.PEACE:
       {
-        s1_tool.processing();
-
         this.creeps_doing();
         this.check_attack();
         this.tower_peace_processing();

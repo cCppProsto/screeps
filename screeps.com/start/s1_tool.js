@@ -1,20 +1,20 @@
   //------------------------------------------------------------------------------
 const SPAWN1_ID = 1;
 
-var s1                 = null;
-var s1_sources         = [];
+//var s1                 = null;
 var s1_energy_capacity = 0;
 var s1_energy          = 0;
 
-var WALL_HITS_AMOUNT = 300000; // 200k
+var WALL_HITS_AMOUNT    = 100000; // 100k
+var RAMPART_HITS_AMOUNT = 200000; // 200k
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 //------------------------------------------------------------------------------
 
+// !!! ATTENTION !!!   --> for fisrt run need uncomment <--   !!! ATTENTION !!!
 //Game.spawns.s1.memory.structuresIsRecalc = true;
 //Game.spawns.s1.memory.lastRecalculatedTime = Game.time;
-
-Game.spawns.s1.memory.objectsRecalcNecessarilyTick = 60;
-
+//Game.spawns.s1.memory.energyResourcesID = [];
+/*
 Game.spawns.s1.memory.construction_containers = [];
 Game.spawns.s1.memory.construction_controllers = [];
 Game.spawns.s1.memory.construction_labs = [];
@@ -67,7 +67,9 @@ Game.spawns.s1.memory.repaire_walls = [];
 Game.spawns.s1.memory.repaire_roads = [];
 
 Game.spawns.s1.memory.mineralMineID = "";
+*/
 
+Game.spawns.s1.memory.objectsRecalcNecessarilyTick = 60;
 
 //------------------------------------------------------------------------------
 module.exports =
@@ -146,6 +148,19 @@ module.exports =
 
       this.clear_objects();
 
+      if(Game.spawns.s1.memory.energyResourcesID.length == 0 )
+      {
+        var fsrc   = Game.spawns.s1.room.find(FIND_SOURCES);
+
+        for(var i in fsrc)
+          Game.spawns.s1.memory.energyResourcesID.push(fsrc[i].id);
+
+        Game.spawns.s1.memory.sourceID = 0;
+        Game.spawns.s1.memory.sourceCount = Game.spawns.s1.memory.energyResourcesID.length;
+
+        console.log("resources recalculate!");
+      }
+
       var minerals = Game.spawns.s1.room.find(FIND_MINERALS);
       if(minerals.length > 0)
         Game.spawns.s1.memory.mineralMineID = minerals[0].id;
@@ -179,7 +194,7 @@ module.exports =
           case 'rampart':
           {
             Game.spawns.s1.memory.structure_ramparts.push(res[i].id);
-            if(res[i].hits < res[i].hitsMax)
+            if(res[i].hits < RAMPART_HITS_AMOUNT)
               Game.spawns.s1.memory.repaire_ramparts.push(res[i].id);
             break;
           }
@@ -309,11 +324,6 @@ module.exports =
     get_towers : function()
     {
       return Game.spawns.s1.memory.structure_towers;
-    },
-    //--------------------------------------------------------------------------
-    get_sources: function()
-    {
-      return s1_sources;
     },
     //--------------------------------------------------------------------------
     get_energy_capacity: function()
@@ -489,6 +499,7 @@ module.exports =
       {
         var id = Game.spawns.s1.memory.structure_towers[i];
         var obj = Game.getObjectById(id);
+
         if(obj.energy < obj.energyCapacity)
           return id;
       }
@@ -519,25 +530,10 @@ module.exports =
     {
       if(Game.spawns.s1.memory.sourceID >= Game.spawns.s1.memory.sourceCount)
         Game.spawns.s1.memory.sourceID = 0;
-      return s1_sources[Game.spawns.s1.memory.sourceID++];
-    },
-    //--------------------------------------------------------------------------
-    find_energy_sources : function()
-    {
-      var fsrc   = Game.spawns.s1.room.find(FIND_SOURCES);
-      s1_sources = [];
+      var res = Game.spawns.s1.memory.energyResourcesID[Game.spawns.s1.memory.sourceID];
+      Game.spawns.s1.memory.sourceID++;
 
-      for(var i in fsrc)
-        s1_sources.push(fsrc[i].id);
-
-      Game.spawns.s1.memory.sourceID    = 0;
-      Game.spawns.s1.memory.sourceCount = fsrc.length;
-    },
-    //--------------------------------------------------------------------------
-    processing : function()
-    {
-        if(s1_sources.length == 0)
-            this.find_energy_sources();
+      return res;
     },
     //--------------------------------------------------------------------------
     get_enemies : function()
