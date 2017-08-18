@@ -290,7 +290,13 @@ module.exports =
         }
         case STATE.FIND_FARM:
         {
-          m.resourceID = s1_tool.get_source_id();
+          //m.resourceID = s1_tool.get_source_id();
+          m.resourceID = s1_tool.get_nearest_energy_source_id(builder);
+
+          if(m.resourceID.length == 0)
+            break;
+
+          if(iDL == true) console.log("INFO: Builder[" + builder.name + "]  found nearest farm id(" + m.resourceID + ")");
 
           if(builder.pos.inRangeTo(Game.getObjectById(m.resourceID), 1))
               m.state  = STATE.HARVEST;

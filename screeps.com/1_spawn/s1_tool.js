@@ -646,6 +646,21 @@ module.exports =
       return "";
     },
     //--------------------------------------------------------------------------
+    get_nearest_energy_source_id : function(creepObj)
+    {
+      var tmp_arr = [];
+      var id = "";
+      var res = "";
+      for(var i in Game.spawns.s1.memory.energyResourcesID)
+      {
+        id = Game.spawns.s1.memory.energyResourcesID[i];
+        tmp_arr.push(id);
+      }
+
+      res = this.get_nearest_object_id(creepObj, tmp_arr);
+      return res;
+    },
+    //--------------------------------------------------------------------------
     get_nearest_object_id : function(creepObj, struct_array)
     {
       if(struct_array.length > 0)
