@@ -47,6 +47,8 @@ const STATE =
    ,FIND_FARM      : 10
    ,TO_HARVEST     : 11
    ,HARVEST        : 12
+   ,TO_WAIT        : 13
+   ,WAIT           : 14
 };
 
 const builder_300_body = [MOVE, WORK, WORK, CARRY];
@@ -56,7 +58,7 @@ var   builder_body     = [];
 
 
 // for debug messages
-var iDL = true; //("INFO: Builder[" + builder.name + "]  ");
+var iDL = false; //("INFO: Builder[" + builder.name + "]  ");
 var eDL = true; //("ERROR: Builder[" + builder.name + "]  state res = " + res);
 
 //------------------------------------------------------------------------------
@@ -110,7 +112,13 @@ module.exports =
     builder_move_to : function(builder, target)
     {
       if(builder.fatigue == 0)
-        builder.moveTo(target, {reusePath: 20});
+        builder.moveTo(target, {reusePath: 30});
+    },
+    //------------------------------------------------------------------------------
+    builder_move_to_by_xy : function(builder, x, y)
+    {
+      if(builder.fatigue == 0)
+        builder.moveTo(x, y, {reusePath: 30});
     },
     //------------------------------------------------------------------------------
     doing : function(builder)
@@ -308,6 +316,13 @@ module.exports =
         {
           var source_obj = Game.getObjectById(m.resourceID);
 
+          if(s1_tool.get_res_busy_by_id(m.resourceID) >= s1_tool.get_max_count_on_res_by_id(m.resourceID))
+          {
+            if(iDL == true) console.log("INFO: Builder[" + builder.name + "] Resource " + m.resourceID + " is busy! " +" move to wait");
+            m.state = STATE.TO_WAIT;
+            break;
+          }
+
           if(builder.pos.inRangeTo(source_obj, 1))
               m.state = STATE.HARVEST;
           else
@@ -329,6 +344,26 @@ module.exports =
           }
           else
             m.state = STATE.FIND_BUILD;
+          break;
+        }
+        case STATE.TO_WAIT:
+        {
+          var pos = s1_tool.get_wait_point_pos_by_id(m.resourceID);
+          if(builder.pos.inRangeTo(pos[0], pos[1], 2))
+              m.state = STATE.WAIT;
+          else
+            this.builder_move_to_by_xy(harvester, pos[0], pos[1]);
+          break;
+        }
+        case STATE.WAIT:
+        {
+          if(s1_tool.get_res_busy_by_id(m.resourceID) < s1_tool.get_max_count_on_res_by_id(m.resourceID))
+          {
+            if(iDL == true) console.log("INFO: Builder[" + builder.name +"] from WAIT to HARVEST");
+            m.state = STATE.TO_HARVEST;
+            break;
+          }
+          //if(iDL == true) console.log("INFO: Builder[" + builder.name +"] waiting... ");
           break;
         }
       }

@@ -4,6 +4,8 @@ var s1  = require('s1_creep_proc');
 
 module.exports.loop = function()
 {
+    
+  //console.clear();
   if(Game.spawns.s1)
     s1.processing();
   return;

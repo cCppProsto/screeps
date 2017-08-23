@@ -26,6 +26,8 @@ const STATE =
  ,HARVEST            : 2
  ,TRANSFER_CALCULATE : 3
  ,TRANCFERING        : 4
+ ,TO_WAIT            : 5
+ ,WAIT               : 6
 };
 
 const harvester_300_body = [MOVE, WORK, WORK, CARRY];
@@ -34,9 +36,11 @@ const harvester_700_body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CA
 var   harvester_body     = [];
 
 // for debug messages
-var iDL = true; //("INFO: Harvester[" + harvester.name + "]  ");
+var iDL = false; //("INFO: Harvester[" + harvester.name + "]  ");
 var eDL = true; //("ERROR: Harvester[" + harvester.name + "]  state res = " + res);
 
+const wait_point_x = 8;
+const wait_point_y = 24;
 
 //------------------------------------------------------------------------------
 module.exports =
@@ -85,7 +89,13 @@ module.exports =
   harvester_move_to : function(harvester, target)
   {
     if(harvester.fatigue == 0)
-      harvester.moveTo(target, {reusePath: 30});
+      harvester.moveTo(target, {reusePath: 10});
+  },
+  //------------------------------------------------------------------------------
+  harvester_move_to_by_xy : function(harvester, x, y)
+  {
+    if(harvester.fatigue == 0)
+      harvester.moveTo(x, y, {reusePath: 10});
   },
   //------------------------------------------------------------------------------
   doing : function(harvester)
@@ -112,6 +122,13 @@ module.exports =
       case STATE.TO_HARVEST:
       {
         var source_obj = Game.getObjectById(m.resourceID);
+
+        if(s1_tool.get_res_busy_by_id(m.resourceID) >= s1_tool.get_max_count_on_res_by_id(m.resourceID))
+        {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name + "] Resource " + m.resourceID + " is busy! " +" move to wait");
+          m.state = STATE.TO_WAIT;
+          break;
+        }
 
         if(harvester.pos.inRangeTo(source_obj, 1))
             m.state = STATE.HARVEST;
@@ -217,6 +234,26 @@ module.exports =
         }
         else
          this.harvester_move_to(harvester, target);
+        break;
+      }
+      case STATE.TO_WAIT:
+      {
+        var pos = s1_tool.get_wait_point_pos_by_id(m.resourceID);
+        if(harvester.pos.inRangeTo(pos[0], pos[1], 2))
+            m.state = STATE.WAIT;
+        else
+          this.harvester_move_to_by_xy(harvester, pos[0], pos[1]);
+        break;
+      }
+      case STATE.WAIT:
+      {
+        if(s1_tool.get_res_busy_by_id(m.resourceID) < s1_tool.get_max_count_on_res_by_id(m.resourceID))
+        {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name +"] from WAIT to HARVEST");
+          m.state = STATE.TO_HARVEST;
+          break;
+        }
+        //if(iDL == true) console.log("INFO: Harvester[" + harvester.name +"] waiting... ");
         break;
       }
     }

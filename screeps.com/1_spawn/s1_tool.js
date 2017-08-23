@@ -1,4 +1,4 @@
-  //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const SPAWN1_ID = 1;
 
 //var s1                 = null;
@@ -8,9 +8,28 @@ var s1_energy          = 0;
 var WALL_HITS_AMOUNT    = 100000; // 100k
 var RAMPART_HITS_AMOUNT = 200000; // 200k
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
+
+//Game.spawns.s1.memory.energyResourcesID_0_Pos = [];
+//Game.spawns.s1.memory.m1_energyResourcesID_0_Current = 0;
+//Game.spawns.s1.memory.m2_energyResourcesID_0_Current = 0;
+Game.spawns.s1.memory.energyResourcesID[0] = '5982fc8db097071b4adbdb6e';
+Game.spawns.s1.memory.energyResourcesID_0_Max = 3;
+Game.spawns.s1.memory.energyResourcesID_0_Pos[0] = 5; // X
+Game.spawns.s1.memory.energyResourcesID_0_Pos[1] = 11; // Y
+
+
+//Game.spawns.s1.memory.energyResourcesID_1_Pos = [];
+//Game.spawns.s1.memory.m1_energyResourcesID_1_Current = 0;
+//Game.spawns.s1.memory.m2_energyResourcesID_1_Current = 0;
+Game.spawns.s1.memory.energyResourcesID[1] = '5982fc8db097071b4adbdb6f';
+Game.spawns.s1.memory.energyResourcesID_1_Max = 2;
+Game.spawns.s1.memory.energyResourcesID_1_Pos[0] = 8; // X
+Game.spawns.s1.memory.energyResourcesID_1_Pos[1] = 24; // Y
+
 //------------------------------------------------------------------------------
 
 // !!! ATTENTION !!!   --> for fisrt run need uncomment <--   !!! ATTENTION !!!
+
 //Game.spawns.s1.memory.structuresIsRecalc = true;
 //Game.spawns.s1.memory.lastRecalculatedTime = Game.time;
 //Game.spawns.s1.memory.energyResourcesID = [];
@@ -66,7 +85,52 @@ Game.spawns.s1.memory.repaire_terminals = [];
 Game.spawns.s1.memory.repaire_walls = [];
 Game.spawns.s1.memory.repaire_roads = [];
 
+Game.spawns.s1.memory.isStatisticMemory1 = true;
+Game.spawns.s1.memory.sHr_m1_to_harvest    = 0;
+Game.spawns.s1.memory.sHr_m1_harvest       = 0;
+Game.spawns.s1.memory.sHr_m1_transfer_calc = 0;
+Game.spawns.s1.memory.sHr_m1_transfer      = 0;
+
+Game.spawns.s1.memory.sBld_m1_findResource= 0;
+Game.spawns.s1.memory.sBld_m1_toEnergy    = 0;
+Game.spawns.s1.memory.sBld_m1_toRepair    = 0;
+Game.spawns.s1.memory.sBld_m1_Repair      = 0;
+Game.spawns.s1.memory.sBld_m1_toBuild     = 0;
+Game.spawns.s1.memory.sBld_m1_Build       = 0;
+Game.spawns.s1.memory.sBld_m1_toHarvest   = 0;
+Game.spawns.s1.memory.sBld_m1_harvest     = 0;
+
+Game.spawns.s1.memory.sRCU_m1_toHarvest = 0;
+Game.spawns.s1.memory.sRCU_m1_harvest   = 0;
+Game.spawns.s1.memory.sBld_m1_toUpgrade = 0;
+Game.spawns.s1.memory.sBld_m1_Upgrade   = 0;
+
+Game.spawns.s1.memory.sHr_m2_to_harvest   = 0;
+Game.spawns.s1.memory.sHr_m2_harvest      = 0;
+Game.spawns.s1.memory.sHr_m2_transfer_calc= 0;
+Game.spawns.s1.memory.sHr_m2_transfer     = 0;
+
+Game.spawns.s1.memory.sBld_m2_findResource= 0;
+Game.spawns.s1.memory.sBld_m2_toEnergy    = 0;
+Game.spawns.s1.memory.sBld_m2_toRepair    = 0;
+Game.spawns.s1.memory.sBld_m2_Repair      = 0;
+Game.spawns.s1.memory.sBld_m2_toBuild     = 0;
+Game.spawns.s1.memory.sBld_m2_Build       = 0;
+Game.spawns.s1.memory.sBld_m2_toHarvest   = 0;
+Game.spawns.s1.memory.sBld_m2_harvest     = 0;
+
+Game.spawns.s1.memory.sRCU_m2_toHarvest = 0;
+Game.spawns.s1.memory.sRCU_m2_harvest   = 0;
+Game.spawns.s1.memory.sBld_m2_toUpgrade = 0;
+Game.spawns.s1.memory.sBld_m2_Upgrade   = 0;
+
 Game.spawns.s1.memory.mineralMineID = "";
+
+Game.spawns.s1.memory.m1_energyResourcesID_0_Current = 0;
+Game.spawns.s1.memory.m2_energyResourcesID_0_Current = 0;
+Game.spawns.s1.memory.m1_energyResourcesID_1_Current = 0;
+Game.spawns.s1.memory.m2_energyResourcesID_1_Current = 0;
+
 */
 
 Game.spawns.s1.memory.objectsRecalcNecessarilyTick = 60;
@@ -147,19 +211,6 @@ module.exports =
       Game.spawns.s1.memory.lastRecalculatedTime = Game.time;
 
       this.clear_objects();
-
-      if(Game.spawns.s1.memory.energyResourcesID.length == 0 )
-      {
-        var fsrc   = Game.spawns.s1.room.find(FIND_SOURCES);
-
-        for(var i in fsrc)
-          Game.spawns.s1.memory.energyResourcesID.push(fsrc[i].id);
-
-        Game.spawns.s1.memory.sourceID = 0;
-        Game.spawns.s1.memory.sourceCount = Game.spawns.s1.memory.energyResourcesID.length;
-
-        console.log("resources recalculate!");
-      }
 
       var minerals = Game.spawns.s1.room.find(FIND_MINERALS);
       if(minerals.length > 0)
@@ -690,5 +741,353 @@ module.exports =
         return min_id;
       }
       return "";
+    },
+    //--------------------------------------------------------------------------
+    get_max_count_on_res_by_id : function(id)
+    {
+      if(id == Game.spawns.s1.memory.energyResourcesID[0])
+        return Game.spawns.s1.memory.energyResourcesID_0_Max;
+
+      if(id == Game.spawns.s1.memory.energyResourcesID[1])
+        return Game.spawns.s1.memory.energyResourcesID_1_Max;
+      return 0;
+    },
+    //--------------------------------------------------------------------------
+    get_res_busy_by_id : function(id)
+    {
+      //console.log("0 = " + Game.spawns.s1.memory.m2_energyResourcesID_0_Current);
+      //console.log("1 = " + Game.spawns.s1.memory.m2_energyResourcesID_1_Current);
+
+      if(id == Game.spawns.s1.memory.energyResourcesID[0])
+        return Game.spawns.s1.memory.m2_energyResourcesID_0_Current;
+
+      if(id == Game.spawns.s1.memory.energyResourcesID[1])
+        return Game.spawns.s1.memory.m2_energyResourcesID_1_Current;
+    },
+    //--------------------------------------------------------------------------
+    get_wait_point_pos_by_id : function(id)
+    {
+      if(id == Game.spawns.s1.memory.energyResourcesID[0])
+        return Game.spawns.s1.memory.energyResourcesID_0_Pos;
+
+      if(id == Game.spawns.s1.memory.energyResourcesID[1])
+        return Game.spawns.s1.memory.energyResourcesID_1_Pos;
+    },
+    //--------------------------------------------------------------------------
+    builder_statistic_update : function(builder)
+    {
+      var m = builder.memory;
+
+      switch(m.state)
+      {
+        case 0://FIND_RESOURCE  : 0
+        case 2://TAKE_ENERGY    : 2
+        case 3://FIND_REPAIR    : 3
+        case 6://FIND_BUILD     : 6
+        case 9://RECALCULATE    : 9
+        case 10://FIND_FARM      : 10
+          break;
+        case 1://TO_ENERGY      : 1
+        {
+          Game.spawns.s1.memory.sBld_m1_toEnergy++;
+          break;
+        }
+        case 4://TO_REPAIR      : 4
+        {
+          Game.spawns.s1.memory.sBld_m1_toRepair++;
+          break;
+        }
+        case 5://REPAIR         : 5
+        {
+          Game.spawns.s1.memory.sBld_m1_Repair++;
+          break;
+        }
+        case 7://TO_BUILD       : 7
+        {
+          Game.spawns.s1.memory.sBld_m1_toBuild++;
+          break;
+        }
+        case 8://BUILD          : 8
+        {
+          Game.spawns.s1.memory.sBld_m1_Build++;
+          break;
+        }
+        case 11://TO_HARVEST     : 11
+        {
+          Game.spawns.s1.memory.sBld_m1_toHarvest++;
+          break;
+        }
+        case 12://HARVEST        : 12
+        {
+          Game.spawns.s1.memory.sBld_m1_harvest++;
+
+          if(m.resourceID == Game.spawns.s1.memory.energyResourcesID[0])
+            Game.spawns.s1.memory.m1_energyResourcesID_0_Current++;
+          else if(m.resourceID == Game.spawns.s1.memory.energyResourcesID[1])
+            Game.spawns.s1.memory.m1_energyResourcesID_1_Current++;
+          break;
+        }
+      }
+    },
+    //--------------------------------------------------------------------------
+    harvester_statistic_update : function(harvester)
+    {
+      var m = harvester.memory;
+
+      switch(m.state)
+      {
+        case 0: // STATE.FIND_RESOURCE:
+        {
+          break;
+        }
+        case 1: // STATE.TO_HARVEST:
+        {
+          Game.spawns.s1.memory.sHr_m1_to_harvest++;
+          break;
+        }
+        case 2: // STATE.HARVEST:
+        {
+          Game.spawns.s1.memory.sHr_m1_harvest++;
+
+          if(m.resourceID == Game.spawns.s1.memory.energyResourcesID[0])
+            Game.spawns.s1.memory.m1_energyResourcesID_0_Current++;
+          else if(m.resourceID == Game.spawns.s1.memory.energyResourcesID[1])
+            Game.spawns.s1.memory.m1_energyResourcesID_1_Current++;
+
+          break;
+        }
+        case 3: // STATE.TRANSFER_CALCULATE:
+        {
+          Game.spawns.s1.memory.sHr_m1_transfer_calc++;
+          break;
+        }
+        case 4: // STATE.TRANCFERING:
+        {
+          Game.spawns.s1.memory.sHr_m1_transfer++;
+          break;
+        }
+      }
+    },
+    //--------------------------------------------------------------------------
+    rcl_upgrader_statistic_update : function(upgrader)
+    {
+      var m = upgrader.memory;
+
+      switch(m.state)
+      {
+        case 0: //FIND_RESOURCE : 0
+          break;
+        case 1: //TO_HARVEST    : 1
+        {
+          Game.spawns.s1.memory.sRCU_m1_toHarvest++;
+          break;
+        }
+        case 2: //HARVEST       : 2
+        {
+          Game.spawns.s1.memory.sRCU_m1_harvest++;
+
+          if(m.resourceID == Game.spawns.s1.memory.energyResourcesID[0])
+            Game.spawns.s1.memory.m1_energyResourcesID_0_Current++;
+          else if(m.resourceID == Game.spawns.s1.memory.energyResourcesID[1])
+            Game.spawns.s1.memory.m1_energyResourcesID_1_Current++;
+          break;
+        }
+        case 3: //TO_UPGRADE    : 3
+        {
+          Game.spawns.s1.memory.sBld_m1_toUpgrade++;
+          break;
+        }
+        case 4: //UPGRADE       : 4
+        {
+          Game.spawns.s1.memory.sBld_m1_Upgrade++;
+          break;
+        }
+      }
+    },
+    //--------------------------------------------------------------------------
+    statistic_update : function()
+    {
+      if(Game.spawns.s1.memory.isStatisticMemory1 == null)
+      {
+        Game.spawns.s1.memory.isStatisticMemory1 = true;
+        Game.spawns.s1.memory.sHr_m1_to_harvest    = 0;
+        Game.spawns.s1.memory.sHr_m1_harvest       = 0;
+        Game.spawns.s1.memory.sHr_m1_transfer_calc = 0;
+        Game.spawns.s1.memory.sHr_m1_transfer      = 0;
+
+        Game.spawns.s1.memory.sBld_m1_findResource= 0;
+        Game.spawns.s1.memory.sBld_m1_toEnergy    = 0;
+        Game.spawns.s1.memory.sBld_m1_toRepair    = 0;
+        Game.spawns.s1.memory.sBld_m1_Repair      = 0;
+        Game.spawns.s1.memory.sBld_m1_toBuild     = 0;
+        Game.spawns.s1.memory.sBld_m1_Build       = 0;
+        Game.spawns.s1.memory.sBld_m1_toHarvest   = 0;
+        Game.spawns.s1.memory.sBld_m1_harvest     = 0;
+
+        Game.spawns.s1.memory.sRCU_m1_toHarvest = 0;
+        Game.spawns.s1.memory.sRCU_m1_harvest   = 0;
+        Game.spawns.s1.memory.sBld_m1_toUpgrade = 0;
+        Game.spawns.s1.memory.sBld_m1_Upgrade   = 0;
+
+        Game.spawns.s1.memory.sHr_m2_to_harvest   = 0;
+        Game.spawns.s1.memory.sHr_m2_harvest      = 0;
+        Game.spawns.s1.memory.sHr_m2_transfer_calc= 0;
+        Game.spawns.s1.memory.sHr_m2_transfer     = 0;
+
+        Game.spawns.s1.memory.sBld_m2_findResource= 0;
+        Game.spawns.s1.memory.sBld_m2_toEnergy    = 0;
+        Game.spawns.s1.memory.sBld_m2_toRepair    = 0;
+        Game.spawns.s1.memory.sBld_m2_Repair      = 0;
+        Game.spawns.s1.memory.sBld_m2_toBuild     = 0;
+        Game.spawns.s1.memory.sBld_m2_Build       = 0;
+        Game.spawns.s1.memory.sBld_m2_toHarvest   = 0;
+        Game.spawns.s1.memory.sBld_m2_harvest     = 0;
+
+        Game.spawns.s1.memory.sRCU_m2_toHarvest = 0;
+        Game.spawns.s1.memory.sRCU_m2_harvest   = 0;
+        Game.spawns.s1.memory.sBld_m2_toUpgrade = 0;
+        Game.spawns.s1.memory.sBld_m2_Upgrade   = 0;
+      }
+
+      Game.spawns.s1.memory.sHr_m2_to_harvest   = Game.spawns.s1.memory.sHr_m1_to_harvest;
+      Game.spawns.s1.memory.sHr_m2_harvest      = Game.spawns.s1.memory.sHr_m1_harvest;
+      Game.spawns.s1.memory.sHr_m2_transfer_calc= Game.spawns.s1.memory.sHr_m1_transfer_calc;
+      Game.spawns.s1.memory.sHr_m2_transfer     = Game.spawns.s1.memory.sHr_m1_transfer;
+
+      Game.spawns.s1.memory.sBld_m2_toEnergy    = Game.spawns.s1.memory.sBld_m1_toEnergy;
+      Game.spawns.s1.memory.sBld_m2_toRepair    = Game.spawns.s1.memory.sBld_m1_toRepair;
+      Game.spawns.s1.memory.sBld_m2_Repair      = Game.spawns.s1.memory.sBld_m1_Repair;
+      Game.spawns.s1.memory.sBld_m2_toBuild     = Game.spawns.s1.memory.sBld_m1_toBuild;
+      Game.spawns.s1.memory.sBld_m2_Build       = Game.spawns.s1.memory.sBld_m1_Build;
+      Game.spawns.s1.memory.sBld_m2_toHarvest   = Game.spawns.s1.memory.sBld_m1_toHarvest;
+      Game.spawns.s1.memory.sBld_m2_harvest     = Game.spawns.s1.memory.sBld_m1_harvest;
+
+      Game.spawns.s1.memory.sRCU_m2_toHarvest = Game.spawns.s1.memory.sRCU_m1_toHarvest;
+      Game.spawns.s1.memory.sRCU_m2_harvest   = Game.spawns.s1.memory.sRCU_m1_harvest;
+      Game.spawns.s1.memory.sBld_m2_toUpgrade = Game.spawns.s1.memory.sBld_m1_toUpgrade;
+      Game.spawns.s1.memory.sBld_m2_Upgrade   = Game.spawns.s1.memory.sBld_m1_Upgrade;
+
+      Game.spawns.s1.memory.m2_energyResourcesID_0_Current = Game.spawns.s1.memory.m1_energyResourcesID_0_Current;
+      Game.spawns.s1.memory.m2_energyResourcesID_1_Current = Game.spawns.s1.memory.m1_energyResourcesID_1_Current;
+
+
+
+      Game.spawns.s1.memory.sHr_m1_to_harvest   = 0;
+      Game.spawns.s1.memory.sHr_m1_harvest      = 0;
+      Game.spawns.s1.memory.sHr_m1_transfer_calc= 0;
+      Game.spawns.s1.memory.sHr_m1_transfer     = 0;
+
+      Game.spawns.s1.memory.sBld_m1_toEnergy    = 0;
+      Game.spawns.s1.memory.sBld_m1_toRepair    = 0;
+      Game.spawns.s1.memory.sBld_m1_Repair      = 0;
+      Game.spawns.s1.memory.sBld_m1_toBuild     = 0;
+      Game.spawns.s1.memory.sBld_m1_Build       = 0;
+      Game.spawns.s1.memory.sBld_m1_toHarvest   = 0;
+      Game.spawns.s1.memory.sBld_m1_harvest     = 0;
+
+      Game.spawns.s1.memory.sRCU_m1_toHarvest = 0;
+      Game.spawns.s1.memory.sRCU_m1_harvest   = 0;
+      Game.spawns.s1.memory.sBld_m1_toUpgrade = 0;
+      Game.spawns.s1.memory.sBld_m1_Upgrade   = 0;
+
+      Game.spawns.s1.memory.m1_energyResourcesID_0_Current = 0;
+      Game.spawns.s1.memory.m1_energyResourcesID_1_Current = 0;
+    },
+    //--------------------------------------------------------------------------
+    statistic_print : function()
+    {
+      if(Game.spawns.s1.memory.isStatisticMemory1 == true)
+      {
+        console.log("Harv: toHarv " + Game.spawns.s1.memory.sHr_m1_to_harvest +
+                    " | Harv "       + Game.spawns.s1.memory.sHr_m1_harvest +
+                    " | TransfCalc " + Game.spawns.s1.memory.sHr_m1_transfer_calc +
+                    " | Transf "     + Game.spawns.s1.memory.sHr_m1_transfer);
+
+        console.log("Bldr: toEnrg " + Game.spawns.s1.memory.sBld_m1_toEnergy +
+                    " | toRepr "     + Game.spawns.s1.memory.sBld_m1_toRepair +
+                    " | Repr "       + Game.spawns.s1.memory.sBld_m1_Repair +
+                    " | toBld "      + Game.spawns.s1.memory.sBld_m1_toBuild +
+                    " | Bld "        + Game.spawns.s1.memory.sBld_m1_Build +
+                    " | toHarv "     + Game.spawns.s1.memory.sBld_m1_toHarvest+
+                    " | Harv "       + Game.spawns.s1.memory.sBld_m1_harvest
+                  );
+        console.log("RCLU: toHarv " + Game.spawns.s1.memory.sRCU_m1_toHarvest +
+                    " | Harv"       + Game.spawns.s1.memory.sRCU_m1_harvest +
+                    " | toUpgr "    + Game.spawns.s1.memory.sBld_m1_toUpgrade +
+                    " | Upgr "      + Game.spawns.s1.memory.sBld_m1_Upgrade
+                  );
+      }
+      else
+      {
+        console.log("Harv: toHarv " + Game.spawns.s1.memory.sHr_m2_to_harvest +
+                    " | Harv "       + Game.spawns.s1.memory.sHr_m2_harvest +
+                    " | TransfCalc " + Game.spawns.s1.memory.sHr_m2_transfer_calc +
+                    " | Transf "     + Game.spawns.s1.memory.sHr_m2_transfer);
+
+        console.log("Bldr: toEnrg " + Game.spawns.s1.memory.sBld_m2_toEnergy +
+                    " | toRepr "     + Game.spawns.s1.memory.sBld_m2_toRepair +
+                    " | Repr "       + Game.spawns.s1.memory.sBld_m2_Repair +
+                    " | toBld "      + Game.spawns.s1.memory.sBld_m2_toBuild +
+                    " | Bld "        + Game.spawns.s1.memory.sBld_m2_Build +
+                    " | toHarv "     + Game.spawns.s1.memory.sBld_m2_toHarvest +
+                    " | Harv "       + Game.spawns.s1.memory.sBld_m2_harvest
+                  );
+
+        console.log("RCLU: toHarv " + Game.spawns.s1.memory.sRCU_m2_toHarvest +
+                    " | Harv"       + Game.spawns.s1.memory.sRCU_m2_harvest +
+                    " | toUpgr "    + Game.spawns.s1.memory.sBld_m2_toUpgrade +
+                    " | Upgr "      + Game.spawns.s1.memory.sBld_m2_Upgrade
+                  );
+      }
+    },
+    //--------------------------------------------------------------------------
+    statistic_common_print : function()
+    {
+      if(Game.spawns.s1.memory.isStatisticMemory1 == true)
+      {
+        console.log("toHarvest " + (  Game.spawns.s1.memory.sHr_m1_to_harvest
+                                    + Game.spawns.s1.memory.sBld_m1_toHarvest
+                                    + Game.spawns.s1.memory.sRCU_m1_toHarvest)
+                  +
+                    " | Harvest "   + (Game.spawns.s1.memory.sHr_m1_harvest
+                                       + Game.spawns.s1.memory.sBld_m1_harvest
+                                       + Game.spawns.s1.memory.sRCU_m1_harvest)
+                  );
+
+        console.log("Res(" + Game.spawns.s1.memory.energyResourcesID[0] + ")" +
+                     Game.spawns.s1.memory.m1_energyResourcesID_0_Current + " "+
+                     "Res(" + Game.spawns.s1.memory.energyResourcesID[1] + ")" +
+                     Game.spawns.s1.memory.m1_energyResourcesID_1_Current
+                  );
+      }
+      else
+      {
+        console.log("toHarvest " + (  Game.spawns.s1.memory.sHr_m2_to_harvest
+                                    + Game.spawns.s1.memory.sBld_m2_toHarvest
+                                    + Game.spawns.s1.memory.sRCU_m2_toHarvest)
+                  +
+                    " | Harvest "   + (Game.spawns.s1.memory.sHr_m2_harvest
+                                       + Game.spawns.s1.memory.sBld_m2_harvest
+                                       + Game.spawns.s1.memory.sRCU_m2_harvest)
+                  );
+
+        console.log("Res(" + Game.spawns.s1.memory.energyResourcesID[0] + ")" +
+                     Game.spawns.s1.memory.m2_energyResourcesID_0_Current + " "+
+                     "Res(" + Game.spawns.s1.memory.energyResourcesID[1] + ")" +
+                     Game.spawns.s1.memory.m2_energyResourcesID_1_Current
+                  );
+      }
+    },
+    //--------------------------------------------------------------------------
+    get_busy_resource : function(id)
+    {
+      //console.log(Game.spawns.s1.memory.m1_energyResourcesID_0_Current + ":" + Game.spawns.s1.memory.m1_energyResourcesID_1_Current);
+      return 0;
+      if(id == Game.spawns.s1.memory.energyResourcesID[0])
+        return Game.spawns.s1.memory.m1_energyResourcesID_0_Current;
+
+      if(id == Game.spawns.s1.memory.energyResourcesID[1])
+        return Game.spawns.s1.memory.m1_energyResourcesID_1_Current;
+      return 0;
     }
-  };
+};
