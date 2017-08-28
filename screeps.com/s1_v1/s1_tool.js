@@ -1,9 +1,8 @@
 // for debug messages
+var iDM = true;
+var eDM = true;
 
-var iDM = true; //("S1_TOOL[INFO]: S1 creeps[" + builder.name + "]  ");
 const iDM_HEAD = "S1_TOOL[INFO]: ";
-
-var eDM = true; //("S1_TOOL[ERROR]: S1 creeps[" + builder.name + "]  state res = " + res);
 const eDM_HEAD = "S1_TOOL[ERROR]: ";
 
 const SPAWN_S1_ID = 1;
@@ -422,8 +421,8 @@ module.exports =
           break;
         }
       }
-    }    
-    
+    }
+
     if(iDM == true) console.log(iDM_HEAD + "all objects were recalculated");
   },
   //--------------------------------------------------------------------

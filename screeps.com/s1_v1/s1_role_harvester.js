@@ -3,10 +3,10 @@ var s1_tool    = require('s1_tool');
 const SPAWN_S1_ID = 1;
 
 // for debug messages
-var iDM = false; //("HARVESTER[INFO]: S1 creeps[" + builder.name + "]  ");
-const iDM_HEAD = "HARVESTER[INFO] ";
+var iDM = false;
+var eDM = true;
 
-var eDM = true; //("HARVESTER[ERROR]: S1 creeps[" + builder.name + "]  state res = " + res);
+const iDM_HEAD = "HARVESTER[INFO] ";
 const eDM_HEAD = "HARVESTER[ERROR] ";
 
 /* CREEP BODY
@@ -55,7 +55,7 @@ const TYPE =
 
 const t1_body_300  = [WORK, MOVE, CARRY, CARRY, CARRY];
 const t2_body_450  = [WORK, WORK, MOVE,  CARRY, CARRY, CARRY, CARRY];
-const t3_body_550  = [WORK, WORK, MOVE, MOVE,  MOVE,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+const t3_body_650  = [WORK, WORK, MOVE, MOVE,  MOVE,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
 //const t4_body_1000 = [WORK, WORK, MOVE, MOVE,  MOVE,  MOVE,  MOVE,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
 var   body         = [];
 
@@ -73,9 +73,9 @@ module.exports =
 
       var current_energy = Game.spawns.s1.memory.energyInStores;
 
-      if(current_energy >= 550)
+      if(current_energy >= 650)
       {
-        body = t3_body_550;
+        body = t3_body_650;
         return TYPE.T3;
       }
       
@@ -164,10 +164,11 @@ module.exports =
   //--------------------------------------------------------------------
   check_and_set_to_farm : function(harvester)
   {
-    var tickToLive = harvester.ticksToLive + 20; // needs investigate number of 20
+    var tickToLive = harvester.ticksToLive + 30; // 30 ????
     
     var enID = harvester.memory.energyID;
-    if(harvester.tick_to_full >= tickToLive) 
+
+    if(tickToLive < harvester.memory.tick_to_full) 
     {
       harvester.memory.main_state = MAIN_STATE.SUICIDE;
       return;
@@ -178,11 +179,11 @@ module.exports =
       harvester.memory.main_state = MAIN_STATE.TO_WAIT;
       return;
     }
-        
-    var energy_obj = Game.getObjectById(enID);
-    s1_tool.energy_grab(enID);    
 
     harvester.memory.main_state  = MAIN_STATE.TO_FARM;
+
+    var energy_obj = Game.getObjectById(enID);
+    s1_tool.energy_grab(enID);    
   },
   //--------------------------------------------------------------------
   init : function(harvester)
@@ -237,8 +238,6 @@ module.exports =
     else
     {
       s1_tool.energy_ungrab(harvester.memory.energyID);
-      
-      // trancfer calc
       this.trancfer_calculate(harvester);
     }
   },
@@ -265,7 +264,6 @@ module.exports =
           return;
         }
         this.check_and_set_to_farm(harvester);
-        //harvester.memory.main_state = MAIN_STATE.TO_FARM;
         return;
       }
       
@@ -353,8 +351,8 @@ module.exports =
   //--------------------------------------------------------------------
   suicide : function(harvester)
   {
-    if(iDM == true) console.log(iDM_HEAD + harvester.name + " AKBAR!");
-
+    //if(iDM == true) console.log(iDM_HEAD + harvester.name + " AKBAR!");
+    console.log(iDM_HEAD + harvester.name + " AKBAR!");
     harvester.suicide();
   },
   //--------------------------------------------------------------------

@@ -1,11 +1,11 @@
 var s1_tool    = require('s1_tool');
 
 // for debug messages
-var iDM = true; //("HARVESTER[INFO]: S1 creeps[" + builder.name + "]  ");
-const iDM_HEAD = "HARVESTER[INFO] ";
+var iDM = true;
+var eDM = true;
 
-var eDM = true; //("HARVESTER[ERROR]: S1 creeps[" + builder.name + "]  state res = " + res);
-const eDM_HEAD = "HARVESTER[ERROR] ";
+const iDM_HEAD = "RCL UPGRADER[INFO] ";
+const eDM_HEAD = "RCL UPGRADER[ERROR] ";
 
 /* CREEP BODY
 MOVE            50
@@ -129,10 +129,13 @@ module.exports =
   //--------------------------------------------------------------------
   check_and_set_to_get_energy : function(upgrader)
   {
-    var tickToLive = upgrader.ticksToLive + 20; // needs investigate number of 20
-    
+    var tickToLive = upgrader.ticksToLive + 40; // 40 ????
+
     var enID = upgrader.memory.energyID;
-    if(upgrader.tick_to_full >= tickToLive) 
+    
+    //console.log(upgrader.name + " - " + tickToLive + " : " + upgrader.memory.tick_to_full);
+    
+    if(tickToLive < upgrader.memory.tick_to_full) 
     {
       upgrader.memory.main_state = MAIN_STATE.SUICIDE;
       return;
@@ -274,8 +277,8 @@ module.exports =
   //--------------------------------------------------------------------
   suicide : function(upgrader)
   {
-    if(iDM == true) console.log(iDM_HEAD + upgrader.name + " AKBAR!");
-
+    //if(iDM == true) console.log(iDM_HEAD + upgrader.name + " AKBAR!");
+    console.log(iDM_HEAD + upgrader.name + " AKBAR!");
     upgrader.suicide();
   },
   //--------------------------------------------------------------------
