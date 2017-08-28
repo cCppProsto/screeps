@@ -47,12 +47,19 @@ const STATE =
    ,FIND_FARM      : 10
    ,TO_HARVEST     : 11
    ,HARVEST        : 12
+   ,TO_WAIT        : 13
+   ,WAIT           : 14
 };
 
 const builder_300_body = [MOVE, WORK, CARRY, CARRY, CARRY];
-const builder_500_body = [MOVE, MOVE, WORK,  WORK, CARRY, CARRY, CARRY, CARRY];
+const builder_500_body = [MOVE, MOVE, WORK,  WORK, WORK, CARRY, CARRY];
 const builder_700_body = [MOVE, MOVE, MOVE,  MOVE, MOVE,  WORK,  WORK, CARRY, CARRY, CARRY, CARRY, CARRY];
 var   builder_body     = [];
+
+
+// for debug messages
+var iDL = false; //("INFO: Builder[" + builder.name + "]  ");
+var eDL = true; //("ERROR: Builder[" + builder.name + "]  state res = " + res);
 
 //------------------------------------------------------------------------------
 module.exports =
@@ -88,7 +95,7 @@ module.exports =
 
         if(builder_body.length > 0)
         {
-          console.log("builder creating...");
+          if(iDL == true) console.log("INFO: Builder start creating");
           s1_tool.recalculate_objects();
 
           Game.spawns.s1.createCreep(builder_body,
@@ -105,25 +112,31 @@ module.exports =
     builder_move_to : function(builder, target)
     {
       if(builder.fatigue == 0)
-        builder.moveTo(target, {reusePath: 20});
+        builder.moveTo(target, {reusePath: 30});
+    },
+    //------------------------------------------------------------------------------
+    builder_move_to_by_xy : function(builder, x, y)
+    {
+      if(builder.fatigue == 0)
+        builder.moveTo(x, y, {reusePath: 30});
     },
     //------------------------------------------------------------------------------
     doing : function(builder)
     {
       if(builder.spawning)
           return;
+
       var m = builder.memory;
-      //console.log(m.state + " " + builder.name);
       switch(m.state)
       {
         case STATE.FIND_RESOURCE:
         {
           var storeID;
-
-          storeID = s1_tool.get_store_with_max_energy();
+          storeID = s1_tool.get_nearest_not_empty_store_energy_id(builder);
 
           if(storeID.length > 0)
           {
+              if(iDL == true) console.log("INFO: Builder[" + builder.name + "] moving to not empty nearest store id(" + storeID + ")");
               m.targetID = storeID;
               m.state    = STATE.TO_ENERGY;
               break;
@@ -218,14 +231,17 @@ module.exports =
 
           if(res != OK)
           {
-            console.log("Builder(" + builder.name + "):[REPAIR] error - " + res);
+            if(iDL == true) console.log("INFO: Builder(" + builder.name + "):[REPAIR] error - " + res);
             m.state = STATE.RECALCULATE;
           }
           break;
         }
         case STATE.FIND_BUILD:
         {
-          var res = s1_tool.get_build_object_id();
+          var res = s1_tool.get_nearest_build_id(builder);
+
+          if(iDL == true) console.log("INFO: Builder[" + builder.name + "] moving to nearest object for building id(" + res + ")");
+
           if(res.length > 0)
           {
               m.targetID = res;
@@ -282,7 +298,13 @@ module.exports =
         }
         case STATE.FIND_FARM:
         {
-          m.resourceID = s1_tool.get_source_id();
+          //m.resourceID = s1_tool.get_source_id();
+          m.resourceID = s1_tool.get_nearest_energy_source_id(builder);
+
+          if(m.resourceID.length == 0)
+            break;
+
+          if(iDL == true) console.log("INFO: Builder[" + builder.name + "]  found nearest farm id(" + m.resourceID + ")");
 
           if(builder.pos.inRangeTo(Game.getObjectById(m.resourceID), 1))
               m.state  = STATE.HARVEST;
@@ -293,6 +315,13 @@ module.exports =
         case STATE.TO_HARVEST:
         {
           var source_obj = Game.getObjectById(m.resourceID);
+
+          if(s1_tool.get_res_busy_by_id(m.resourceID) >= s1_tool.get_max_count_on_res_by_id(m.resourceID))
+          {
+            if(iDL == true) console.log("INFO: Builder[" + builder.name + "] Resource " + m.resourceID + " is busy! " +" move to wait");
+            m.state = STATE.TO_WAIT;
+            break;
+          }
 
           if(builder.pos.inRangeTo(source_obj, 1))
               m.state = STATE.HARVEST;
@@ -315,6 +344,26 @@ module.exports =
           }
           else
             m.state = STATE.FIND_BUILD;
+          break;
+        }
+        case STATE.TO_WAIT:
+        {
+          var pos = s1_tool.get_wait_point_pos_by_id(m.resourceID);
+          if(builder.pos.inRangeTo(pos[0], pos[1], 1))
+              m.state = STATE.WAIT;
+          else
+            this.builder_move_to_by_xy(builder, pos[0], pos[1]);
+          break;
+        }
+        case STATE.WAIT:
+        {
+          if(s1_tool.get_res_busy_by_id(m.resourceID) < s1_tool.get_max_count_on_res_by_id(m.resourceID))
+          {
+            if(iDL == true) console.log("INFO: Builder[" + builder.name +"] from WAIT to HARVEST");
+            m.state = STATE.TO_HARVEST;
+            break;
+          }
+          //if(iDL == true) console.log("INFO: Builder[" + builder.name +"] waiting... ");
           break;
         }
       }

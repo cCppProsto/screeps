@@ -26,12 +26,18 @@ const STATE =
  ,HARVEST            : 2
  ,TRANSFER_CALCULATE : 3
  ,TRANCFERING        : 4
+ ,TO_WAIT            : 5
+ ,WAIT               : 6
 };
 
-const harvester_300_body = [MOVE, WORK, WORK,  CARRY];
-const harvester_500_body = [MOVE, WORK, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY];
-const harvester_700_body = [MOVE, MOVE, MOVE, WORK, WORK,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
+const harvester_300_body = [MOVE, WORK, WORK, CARRY];
+const harvester_500_body = [MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY];
+const harvester_700_body = [MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY];
 var   harvester_body     = [];
+
+// for debug messages
+var iDL = false; //("INFO: Harvester[" + harvester.name + "]  ");
+var eDL = true; //("ERROR: Harvester[" + harvester.name + "]  state res = " + res);
 
 //------------------------------------------------------------------------------
 module.exports =
@@ -80,7 +86,13 @@ module.exports =
   harvester_move_to : function(harvester, target)
   {
     if(harvester.fatigue == 0)
-      harvester.moveTo(target, {reusePath: 30});
+      harvester.moveTo(target, {reusePath: 10});
+  },
+  //------------------------------------------------------------------------------
+  harvester_move_to_by_xy : function(harvester, x, y)
+  {
+    if(harvester.fatigue == 0)
+      harvester.moveTo(x, y, {reusePath: 10});
   },
   //------------------------------------------------------------------------------
   doing : function(harvester)
@@ -89,13 +101,14 @@ module.exports =
         return;
 
     var m = harvester.memory;
-    //console.log(m.state + " " + harvester.name);
 
     switch(m.state)
     {
       case STATE.FIND_RESOURCE:
       {
         m.resourceID = s1_tool.get_source_id();
+
+        if(iDL == true) console.log("INFO: Harvester[" + harvester.name + "] found resource id(" + m.resourceID + ")");
 
         if(harvester.pos.inRangeTo(Game.getObjectById(m.resourceID), 1))
             m.state  = STATE.HARVEST;
@@ -106,6 +119,13 @@ module.exports =
       case STATE.TO_HARVEST:
       {
         var source_obj = Game.getObjectById(m.resourceID);
+
+        if(s1_tool.get_res_busy_by_id(m.resourceID) >= s1_tool.get_max_count_on_res_by_id(m.resourceID))
+        {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name + "] Resource " + m.resourceID + " is busy! " +" move to wait");
+          m.state = STATE.TO_WAIT;
+          break;
+        }
 
         if(harvester.pos.inRangeTo(source_obj, 1))
             m.state = STATE.HARVEST;
@@ -121,15 +141,10 @@ module.exports =
         {
           var res = harvester.harvest(Game.getObjectById(m.resourceID));
 
-          if(res == ERR_NOT_ENOUGH_RESOURCES)
-          {
-            //console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
-            break;
-          }
           if(res != OK)
           {
             m.state = STATE.FIND_RESOURCE;
-            //console.log("Harvester(" + harvester.name + "):[HARVEST] error - " + res);
+            if(eDL == true) console.log("ERROR: Harvester " + harvester.name + " STATE.HARVEST res(" + res + ")");
             break;
           }
         }
@@ -140,9 +155,11 @@ module.exports =
       case STATE.TRANSFER_CALCULATE:
       {
         var tower_id;
-        tower_id = s1_tool.get_tower_id_with_not_full_energy();
+        tower_id = s1_tool.get_nearest_not_full_tower_id(harvester);
+
         if(tower_id.length > 0)
         {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name + "] moving to nearest not full tower id(" + tower_id + ")");
           m.targetID = tower_id;
           m.state    = STATE.TRANCFERING;
           break;
@@ -150,21 +167,23 @@ module.exports =
 
         if(Game.spawns.s1.energy < Game.spawns.s1.energyCapacity)
         {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name + "] moving to spawn s1");
           m.targetID = Game.spawns.s1.id;
           m.state    = STATE.TRANCFERING;
           break;
         }
 
         var store_id = "";
-        store_id = s1_tool.get_store_id_for_trancfer_for_harvester();
+        store_id = s1_tool.get_nearest_store_for_transfer_id(harvester);
         if(store_id.length > 0)
         {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name + "] moving to nearest storage id(" + store_id + ")");
           m.targetID = store_id;
           m.state    = STATE.TRANCFERING;
           break;
         }
 
-        console.log("Harvester(" + harvester.name + "):[TRANSFER_CALCULATE] error");
+        if(eDL == true) console.log("ERROR: Harvester[" + harvester.name + "]  STATE.TRANSFER_CALCULATE");
         m.targetID = null;
         break;
       }
@@ -207,11 +226,31 @@ module.exports =
             break;
           }
 
-          console.log("Harvester(" + harvester.name + "):[TRANCFERING] error - " + res);
+          if(eDL == true) console.log("ERROR: Harvester(" + harvester.name + ") STATE.TRANCFERING res = " + res);
           break;
         }
         else
          this.harvester_move_to(harvester, target);
+        break;
+      }
+      case STATE.TO_WAIT:
+      {
+        var pos = s1_tool.get_wait_point_pos_by_id(m.resourceID);
+        if(harvester.pos.inRangeTo(pos[0], pos[1], 2))
+            m.state = STATE.WAIT;
+        else
+          this.harvester_move_to_by_xy(harvester, pos[0], pos[1]);
+        break;
+      }
+      case STATE.WAIT:
+      {
+        if(s1_tool.get_res_busy_by_id(m.resourceID) < s1_tool.get_max_count_on_res_by_id(m.resourceID))
+        {
+          if(iDL == true) console.log("INFO: Harvester[" + harvester.name +"] from WAIT to HARVEST");
+          m.state = STATE.TO_HARVEST;
+          break;
+        }
+        //if(iDL == true) console.log("INFO: Harvester[" + harvester.name +"] waiting... ");
         break;
       }
     }

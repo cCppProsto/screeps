@@ -37,6 +37,11 @@ const CREEP_ROLE =
  ,MINERAL_HARVESTER : 3
 };
 
+// for debug messages
+var iDL = false; //("INFO: S1 creeps[" + builder.name + "]  ");
+var eDL = true; //("ERROR: S1 creeps[" + builder.name + "]  state res = " + res);
+
+
 module.exports =
 {
   //--------------------------------------------------------------------------
@@ -57,18 +62,21 @@ module.exports =
           case CREEP_ROLE.HARVESTER:
           {
             harvester_role.doing(cr);
+            s1_tool.harvester_statistic_update(cr);
             ++harvester_count;
             break;
           }
           case CREEP_ROLE.RCL_UPGRADER:
           {
             rcl_upgrader_role.doing(cr);
+            s1_tool.rcl_upgrader_statistic_update(cr);
             ++rcl_upgrader_count;
             break;
           }
           case CREEP_ROLE.BUILDER:
           {
             builder_role.doing(cr);
+            s1_tool.builder_statistic_update(cr);
             ++builder_count;
             break;
           }
@@ -81,6 +89,11 @@ module.exports =
         }
       }
     }
+
+    //if(iDL == true) s1_tool.statistic_print();
+    if(iDL == true) s1_tool.statistic_common_print();
+
+    s1_tool.statistic_update();
 
     if(mineral_harvester_count < mineral_harvester_max)
     {
@@ -191,7 +204,8 @@ module.exports =
         return;
       }
 
-      if(tower.attack(enemies[0]) != OK)
+      var enemy = Game.getObjectById(enemies[0]);
+      if(tower.attack(enemy) != OK)
         Game.spawns.s1.memory.isAttacked = false;
     }
   },
@@ -201,7 +215,8 @@ module.exports =
     if(Game.spawns.s1.memory.isAttacked == false)
     {
       enemies = s1_tool.get_enemies();
-      if(enemies != null) // ATTACKED!!
+      
+      if(enemies.length > 0) // ATTACKED!!
       {
         console.log("Attacked!");
         Game.spawns.s1.memory.isAttacked = true;
