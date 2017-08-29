@@ -60,9 +60,13 @@ module.exports =
       
       Game.spawns.s1.memory.harvester_count = 0;
       Game.spawns.s1.memory.rcl_upgrader_count = 0;
+      Game.spawns.s1.memory.builder_count = 0;
+      
       Game.spawns.s1.memory.attach_check = 0;
       Game.spawns.s1.memory.enemies = [];
       Game.spawns.s1.memory.isAttacked = false;
+      
+      Game.spawns.s1.memory.countJobForBuilder = 0;
       
       // ENERGY >>
       Game.spawns.s1.memory.energyInStores      = 0;
@@ -263,6 +267,7 @@ module.exports =
 
     this.clear_objects();
 
+    Game.spawns.s1.memory.countJobForBuilder   = 0;
     Game.spawns.s1.memory.forceRecalculate     = false;
     Game.spawns.s1.memory.lastRecalculatedTime = Game.time;
     
@@ -279,7 +284,10 @@ module.exports =
         {
           Game.spawns.s1.memory.struct_walls.push(res[i].id);
           if(res[i].hits < gcWallHitsAmount)
+          {
             Game.spawns.s1.memory.rpr_walls.push(res[i].id);
+            Game.spawns.s1.memory.countJobForBuilder++;
+          }
           break;
         }
         case 'spawn':
@@ -299,8 +307,11 @@ module.exports =
         case 'rampart':
         {
           Game.spawns.s1.memory.struct_ramparts.push(res[i].id);
-          if(res[i].hits < RAMPART_HITS_AMOUNT)
+          if(res[i].hits < gcRampartHitsAmount)
+          {
             Game.spawns.s1.memory.rpr_ramparts.push(res[i].id);
+            Game.spawns.s1.memory.countJobForBuilder++;
+          }
           break;
         }
         case 'link':
@@ -321,7 +332,10 @@ module.exports =
         {
           Game.spawns.s1.memory.struct_towers.push(res[i].id);
           if(res[i].hits < res[i].hitsMax)
+          {
             Game.spawns.s1.memory.rpr_towers.push(res[i].id);
+            Game.spawns.s1.memory.countJobForBuilder++;
+          }
           break;
         }
         case 'observer':
@@ -399,22 +413,102 @@ module.exports =
     {
       switch(res[i].structureType)
       {
-        case 'constructedWall': Game.spawns.s1.memory.constr_walls.push(res[i].id);        break;
-        case 'spawn':           Game.spawns.s1.memory.constr_spawns.push(res[i].id);       break;
-        case 'extension':       Game.spawns.s1.memory.constr_extensions.push(res[i].id);   break;
-        case 'rampart':         Game.spawns.s1.memory.constr_ramparts.push(res[i].id);     break;
-        case 'link':            Game.spawns.s1.memory.constr_links.push(res[i].id);        break;
-        case 'storage':         Game.spawns.s1.memory.constr_storages.push(res[i].id);     break;
-        case 'tower':           Game.spawns.s1.memory.constr_towers.push(res[i].id);       break;
-        case 'observer':        Game.spawns.s1.memory.constr_observers.push(res[i].id);    break;
-        case 'powerSpawn':      Game.spawns.s1.memory.constr_power_spawns.push(res[i].id); break;
-        case 'extractor':       Game.spawns.s1.memory.constr_extractors.push(res[i].id);   break;
-        case 'lab':             Game.spawns.s1.memory.constr_labs.push(res[i].id);         break;
-        case 'terminal':        Game.spawns.s1.memory.constr_terminals.push(res[i].id);    break;
-        case 'container':       Game.spawns.s1.memory.constr_containers.push(res[i].id);   break;
-        case 'nuker':           Game.spawns.s1.memory.constr_nukers.push(res[i].id);       break;
-        case 'road':            Game.spawns.s1.memory.constr_roads.push(res[i].id);        break;
-        case 'controller':      Game.spawns.s1.memory.constr_controllers.push(res[i].id);  break;
+        case 'constructedWall': 
+        {
+          Game.spawns.s1.memory.constr_walls.push(res[i].id);        
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'spawn':           
+        {
+          Game.spawns.s1.memory.constr_spawns.push(res[i].id);       
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'extension':       
+        {
+          Game.spawns.s1.memory.constr_extensions.push(res[i].id);   
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'rampart':         
+        {
+          Game.spawns.s1.memory.constr_ramparts.push(res[i].id);     
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'link':            
+        {
+          Game.spawns.s1.memory.constr_links.push(res[i].id);        
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'storage':         
+        {
+          Game.spawns.s1.memory.constr_storages.push(res[i].id);     
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'tower':           
+        {
+          Game.spawns.s1.memory.constr_towers.push(res[i].id);       
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'observer':        
+        {
+          Game.spawns.s1.memory.constr_observers.push(res[i].id);    
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'powerSpawn':      
+        {
+          Game.spawns.s1.memory.constr_power_spawns.push(res[i].id); 
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'extractor':       
+        {
+          Game.spawns.s1.memory.constr_extractors.push(res[i].id);   
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'lab':             
+        {
+          Game.spawns.s1.memory.constr_labs.push(res[i].id);         
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'terminal':        
+        {
+          Game.spawns.s1.memory.constr_terminals.push(res[i].id);    
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'container':       
+        {
+          Game.spawns.s1.memory.constr_containers.push(res[i].id);   
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'nuker':           
+        {
+          Game.spawns.s1.memory.constr_nukers.push(res[i].id);       
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'road':            
+        {
+          Game.spawns.s1.memory.constr_roads.push(res[i].id);        
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
+        case 'controller':      
+        {
+          Game.spawns.s1.memory.constr_controllers.push(res[i].id);  
+          Game.spawns.s1.memory.countJobForBuilder++;
+          break;
+        }
         default:
         {
           if(eDM == true) console.log(eDM_HEAD + " recalculate constructions UNKNOWN " + res[i].structureType);
@@ -621,7 +715,7 @@ module.exports =
 
     return res;
   },
-  //--------------------------------------------------------------------------
+  //--------------------------------------------------------------------
   get_repair_road_id : function()
   {
     if(Game.spawns.s1.memory.rpr_roads.length > 0)
@@ -635,6 +729,127 @@ module.exports =
     }
     return "";
   },
+  //--------------------------------------------------------------------
+  get_nearest_build_id : function(creepObj)
+  {
+    var res = "";
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_towers);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_extensions);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_storages);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_ramparts);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_walls);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_containers);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_controllers);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_labs);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_links);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_nukers);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_observers);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_power_spawns);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_roads);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_spawns);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_terminals);
+    if(res.length > 0)
+      return res;
+
+    res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.constr_extractors);
+    if(res.length > 0)
+      return res;
+
+    return "";
+  },
+  //--------------------------------------------------------------------------
+  get_nearest_repair_object_id_for_builder : function(creepObj)
+  {
+    var res = "";
+    
+    if(Game.spawns.s1.memory.rpr_towers.length > 0)
+    {       
+      res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.rpr_towers);
+      if(res.length > 0)
+        return res;
+    }
+    
+    if(Game.spawns.s1.memory.rpr_ramparts.length > 0)
+    {
+      res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.rpr_ramparts);
+      if(res.length > 0)
+        return res;
+    }
+    
+    if(Game.spawns.s1.memory.rpr_walls.length > 0)
+    {
+      res = this.get_nearest_object_id(creepObj, Game.spawns.s1.memory.rpr_walls);
+      if(res.length > 0)
+        return res;
+    }
+    
+    return res;
+    //Game.spawns.s1.memory.rpr_storages[0];
+    //Game.spawns.s1.memory.rpr_containers[0];
+    //Game.spawns.s1.memory.rpr_labs[0];
+    //Game.spawns.s1.memory.rpr_links[0];
+    //Game.spawns.s1.memory.rpr_roads[0];
+    //Game.spawns.s1.memory.rpr_nukers[0];
+    //Game.spawns.s1.memory.rpr_observers[0];
+    //Game.spawns.s1.memory.rpr_power_spawns[0];
+    //Game.spawns.s1.memory.rpr_terminals[0];
+    //Game.spawns.s1.memory.rpr_extensions[0];
+    //Game.spawns.s1.memory.rpr_extractors[0];
+  },
+  //--------------------------------------------------------------------
+  is_has_job_for_builder : function()
+  {
+    return Game.spawns.s1.memory.countJobForBuilder > 0;
+  },
+  //--------------------------------------------------------------------
+  builder_job_is_done : function()
+  {
+    if(Game.spawns.s1.memory.countJobForBuilder > 0)
+      Game.spawns.s1.memory.countJobForBuilder--;
+  },
   //------------------ POSITIONS DISTANCES NEAREST <<<<<<<<<<<<<<<<<<<<<
 
   //------------------- STATICTICS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -645,6 +860,7 @@ module.exports =
     
     Game.spawns.s1.memory.harvester_count    = 0;
     Game.spawns.s1.memory.rcl_upgrader_count = 0;
+    Game.spawns.s1.memory.builder_count      = 0;
   },
   //--------------------------------------------------------------------
   statistic_upd_harvester : function(harvester)
@@ -665,13 +881,6 @@ module.exports =
         if(m_enID == en_id_1) { Game.spawns.s1.memory.energyID_1_gath_count++; break; }
         break;
       }
-      case HARV_MAIN_STATE.INIT:
-      case HARV_MAIN_STATE.SUICIDE:
-      case HARV_MAIN_STATE.TO_SPAWN:
-      case HARV_MAIN_STATE.TO_STORAGE:
-      case HARV_MAIN_STATE.TO_WAIT:
-      case HARV_MAIN_STATE.WAIT:
-        break;
     }
   },
   //--------------------------------------------------------------------
@@ -693,13 +902,26 @@ module.exports =
         if(m_enID == en_id_1) { Game.spawns.s1.memory.energyID_1_gath_count++; break; }
         break;
       }
-      case HARV_MAIN_STATE.INIT:
-      case HARV_MAIN_STATE.SUICIDE:
-      case HARV_MAIN_STATE.TO_SPAWN:
-      case HARV_MAIN_STATE.TO_STORAGE:
-      case HARV_MAIN_STATE.TO_WAIT:
-      case HARV_MAIN_STATE.WAIT:
+    }
+  },
+  //--------------------------------------------------------------------
+  statistic_upd_builder : function(builder)
+  {
+    Game.spawns.s1.memory.builder_count++;
+    
+    var m_st    = builder.memory.main_state;
+    var m_enID  = builder.memory.energyID;
+    var en_id_0 = Game.spawns.s1.memory.energyID_0;
+    var en_id_1 = Game.spawns.s1.memory.energyID_1;
+    switch(m_st)
+    {
+      case HARV_MAIN_STATE.FARM:
+      case HARV_MAIN_STATE.TO_FARM:
+      {
+        if(m_enID == en_id_0) { Game.spawns.s1.memory.energyID_0_gath_count++; break; }
+        if(m_enID == en_id_1) { Game.spawns.s1.memory.energyID_1_gath_count++; break; }
         break;
+      }
     }
   },
   //--------------------------------------------------------------------
@@ -721,6 +943,7 @@ module.exports =
         }
         case CREEP_ROLE.BUILDER:
         {
+          this.statistic_upd_builder(Game.creeps[i]);
           break;
         }
         case CREEP_ROLE.RCL_UPGRADER:

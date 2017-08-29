@@ -1,7 +1,7 @@
 var s1_tool    = require('s1_tool');
 
 // for debug messages
-var iDM = true;
+var iDM = false;
 var eDM = true;
 
 const iDM_HEAD = "RCL UPGRADER[INFO] ";
@@ -129,13 +129,13 @@ module.exports =
   //--------------------------------------------------------------------
   check_and_set_to_get_energy : function(upgrader)
   {
-    var tickToLive = upgrader.ticksToLive + 40; // 40 ????
+    var tickToLive = upgrader.ticksToLive; 
 
     var enID = upgrader.memory.energyID;
     
     //console.log(upgrader.name + " - " + tickToLive + " : " + upgrader.memory.tick_to_full);
     
-    if(tickToLive < upgrader.memory.tick_to_full) 
+    if(tickToLive < (upgrader.memory.tick_to_full + 40))  // 40 ????
     {
       upgrader.memory.main_state = MAIN_STATE.SUICIDE;
       return;
@@ -278,7 +278,7 @@ module.exports =
   suicide : function(upgrader)
   {
     //if(iDM == true) console.log(iDM_HEAD + upgrader.name + " AKBAR!");
-    console.log(iDM_HEAD + upgrader.name + " AKBAR!");
+    console.log(iDM_HEAD + upgrader.name + " Bye!");
     upgrader.suicide();
   },
   //--------------------------------------------------------------------

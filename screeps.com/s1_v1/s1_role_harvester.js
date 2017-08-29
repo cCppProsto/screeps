@@ -164,11 +164,13 @@ module.exports =
   //--------------------------------------------------------------------
   check_and_set_to_farm : function(harvester)
   {
-    var tickToLive = harvester.ticksToLive + 30; // 30 ????
+    var tickToLive = harvester.ticksToLive; 
     
     var enID = harvester.memory.energyID;
 
-    if(tickToLive < harvester.memory.tick_to_full) 
+    //console.log(harvester.name + " - " + tickToLive + " : " + harvester.memory.tick_to_full);
+
+    if(tickToLive < (harvester.memory.tick_to_full + 30)) // 30 ????
     {
       harvester.memory.main_state = MAIN_STATE.SUICIDE;
       return;
@@ -352,7 +354,7 @@ module.exports =
   suicide : function(harvester)
   {
     //if(iDM == true) console.log(iDM_HEAD + harvester.name + " AKBAR!");
-    console.log(iDM_HEAD + harvester.name + " AKBAR!");
+    console.log(iDM_HEAD + harvester.name + " Bye!");
     harvester.suicide();
   },
   //--------------------------------------------------------------------

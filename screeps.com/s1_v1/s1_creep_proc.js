@@ -1,6 +1,7 @@
-var s1_tool                = require('s1_tool');
-var harvester_role         = require('s1_role_harvester');
-var rc_upgrader_role       = require('s1_role_rcl_upgrader');
+var s1_tool           = require('s1_tool');
+var harvester_role    = require('s1_role_harvester');
+var rc_upgrader_role  = require('s1_role_rcl_upgrader');
+var builder_role      = require('s1_role_builder');
 
 // for debug messages
 var iDM = false;
@@ -16,6 +17,7 @@ var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 
 var harvester_max      = 6;
 var rc_upgrader_max    = 4;
+var builder_max        = 3;
 
 const CREEP_ROLE =
 {
@@ -44,6 +46,7 @@ module.exports =
         }
         case CREEP_ROLE.BUILDER:
         {
+          builder_role.doing(Game.creeps[i]);
           break;
         }
         case CREEP_ROLE.RCL_UPGRADER:
@@ -125,5 +128,11 @@ module.exports =
 
     if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
       rc_upgrader_role.create();
+      
+    if(Game.spawns.s1.memory.builder_count < builder_max)
+    {
+      if(s1_tool.is_has_job_for_builder() == true)
+        builder_role.create();
+    }
   }
 };
