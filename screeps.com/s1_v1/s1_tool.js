@@ -7,14 +7,6 @@ const eDM_HEAD = "S1_TOOL[ERROR]: ";
 
 const SPAWN_S1_ID = 1;
 
-const CREEP_ROLE =
-{
-  HARVESTER         : 0
- ,RCL_UPGRADER      : 1
- ,BUILDER           : 2
- ,MINERAL_HARVESTER : 3
-};
-
 const HARV_MAIN_STATE =
 {
   INIT        : 0
@@ -28,6 +20,47 @@ const HARV_MAIN_STATE =
 };
 
 const HARV_SECOND_STATE =
+{
+  PEACE             : 0
+ ,BASE_IS_ATTACKED  : 1
+};
+
+const UPGRADER_MAIN_STATE =
+{
+  INIT        : 0
+ ,TO_STORAGE  : 1
+ ,TO_FARM     : 2
+ ,FARM        : 3
+ ,TO_UPGRADE  : 4
+ ,UPGRADE     : 5
+ ,TO_WAIT     : 6
+ ,WAIT        : 7
+ ,SUICIDE     : 8
+};
+
+const UPGRADER_SECOND_STATE =
+{
+  PEACE             : 0
+ ,BASE_IS_ATTACKED  : 1
+};
+
+
+const BUILDER_MAIN_STATE =
+{
+  INIT        : 0
+ ,TO_STORAGE  : 1
+ ,TO_FARM     : 2
+ ,FARM        : 3
+ ,TO_BUILD    : 4
+ ,BUILD       : 5
+ ,TO_REPAIR   : 6
+ ,REPAIR      : 7
+ ,TO_WAIT     : 8
+ ,WAIT        : 9
+ ,SUICIDE     : 10
+};
+
+const BUILDER_SECOND_STATE =
 {
   PEACE             : 0
  ,BASE_IS_ATTACKED  : 1
@@ -54,6 +87,12 @@ module.exports =
       Game.spawns.s1.memory.memoryReinit = false;
   
       // init all variables
+      
+      
+      Game.spawns.s1.memory.HarvesterRoleID   = 0;
+      Game.spawns.s1.memory.BuilderRoleID     = 1;
+      Game.spawns.s1.memory.RclUpgraderRoleID = 2;
+      
       Game.spawns.s1.memory.lastRecalculatedTime    = Game.time;
       Game.spawns.s1.memory.forceRecalculate        = true;
       Game.spawns.s1.memory.GameTicksForRecalculate = 60;
@@ -75,24 +114,26 @@ module.exports =
       Game.spawns.s1.memory.energyCount   = 2;
       Game.spawns.s1.memory.energyCurrNum = 0;
       
-      Game.spawns.s1.memory.energyID_0 = "5982fc8db097071b4adbdb6e";
+      Game.spawns.s1.memory.RoomID = "E47S12";
+      
+      Game.spawns.s1.memory.energyID_0 = "59830097b097071b4adc4983";
       Game.spawns.s1.memory.energyID_0_pos = [];
-      Game.spawns.s1.memory.energyID_0_pos[0] = 0; // x
-      Game.spawns.s1.memory.energyID_0_pos[1] = 15; // y
+      Game.spawns.s1.memory.energyID_0_pos[0] = 23; // x
+      Game.spawns.s1.memory.energyID_0_pos[1] = 37; // y
       Game.spawns.s1.memory.energyID_0_max_creeps = 3;
       Game.spawns.s1.memory.energyID_0_wait_pos = [];
-      Game.spawns.s1.memory.energyID_0_wait_pos[0] = 5; // x
-      Game.spawns.s1.memory.energyID_0_wait_pos[1] = 11; // y
+      Game.spawns.s1.memory.energyID_0_wait_pos[0] = 21; // x
+      Game.spawns.s1.memory.energyID_0_wait_pos[1] = 32; // y
       Game.spawns.s1.memory.energyID_0_gath_count = 0;
 
-      Game.spawns.s1.memory.energyID_1 = "5982fc8db097071b4adbdb6f";
+      Game.spawns.s1.memory.energyID_1 = "59830097b097071b4adc4984";
       Game.spawns.s1.memory.energyID_1_pos = [];
-      Game.spawns.s1.memory.energyID_1_pos[0] = 9; // x
-      Game.spawns.s1.memory.energyID_1_pos[1] = 19; // y
+      Game.spawns.s1.memory.energyID_1_pos[0] = 41; // x
+      Game.spawns.s1.memory.energyID_1_pos[1] = 45; // y
       Game.spawns.s1.memory.energyID_1_max_creeps  = 2;
       Game.spawns.s1.memory.energyID_1_wait_pos    = [];
-      Game.spawns.s1.memory.energyID_1_wait_pos[0] = 10; // x
-      Game.spawns.s1.memory.energyID_1_wait_pos[1] = 25; // y
+      Game.spawns.s1.memory.energyID_1_wait_pos[0] = 46; // x
+      Game.spawns.s1.memory.energyID_1_wait_pos[1] = 41; // y
       Game.spawns.s1.memory.energyID_1_gath_count = 0;
       // ENERGY <<
       
@@ -895,8 +936,8 @@ module.exports =
     
     switch(m_st)
     {
-      case HARV_MAIN_STATE.FARM:
-      case HARV_MAIN_STATE.TO_FARM:
+      case UPGRADER_MAIN_STATE.FARM:
+      case UPGRADER_MAIN_STATE.TO_FARM:
       {
         if(m_enID == en_id_0) { Game.spawns.s1.memory.energyID_0_gath_count++; break; }
         if(m_enID == en_id_1) { Game.spawns.s1.memory.energyID_1_gath_count++; break; }
@@ -915,8 +956,8 @@ module.exports =
     var en_id_1 = Game.spawns.s1.memory.energyID_1;
     switch(m_st)
     {
-      case HARV_MAIN_STATE.FARM:
-      case HARV_MAIN_STATE.TO_FARM:
+      case BUILDER_MAIN_STATE.FARM:
+      case BUILDER_MAIN_STATE.TO_FARM:
       {
         if(m_enID == en_id_0) { Game.spawns.s1.memory.energyID_0_gath_count++; break; }
         if(m_enID == en_id_1) { Game.spawns.s1.memory.energyID_1_gath_count++; break; }
@@ -936,23 +977,19 @@ module.exports =
 
       switch(Game.creeps[i].memory.role)
       {
-        case CREEP_ROLE.HARVESTER:
+        case Game.spawns.s1.memory.HarvesterRoleID:
         {
           this.statistic_upd_harvester(Game.creeps[i]);
           break;
         }
-        case CREEP_ROLE.BUILDER:
+        case Game.spawns.s1.memory.BuilderRoleID:
         {
           this.statistic_upd_builder(Game.creeps[i]);
           break;
         }
-        case CREEP_ROLE.RCL_UPGRADER:
+        case Game.spawns.s1.memory.RclUpgraderRoleID:
         {
           this.statistic_upd_rcl_upgrader(Game.creeps[i]);
-          break;
-        }
-        case CREEP_ROLE.MINERAL_HARVESTER:
-        {
           break;
         }
       }

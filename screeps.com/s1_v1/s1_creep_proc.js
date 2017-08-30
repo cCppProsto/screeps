@@ -15,17 +15,9 @@ const eDM_HEAD = "S1_CREEP_PROC[ERROR] ";
 const SPAWN_S1_ID = 1;
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 
-var harvester_max      = 6;
+var harvester_max      = 4;
 var rc_upgrader_max    = 4;
 var builder_max        = 3;
-
-const CREEP_ROLE =
-{
-  HARVESTER         : 0
- ,RCL_UPGRADER      : 1
- ,BUILDER           : 2
- ,MINERAL_HARVESTER : 3
-};
 
 module.exports =
 {
@@ -34,28 +26,28 @@ module.exports =
   {
     for(var i in Game.creeps)
     {
+      if(Game.creeps[i].spawning == true)
+        continue;
+
       if(Game.creeps[i].memory.spawn_id != SPAWN_S1_ID)
         continue;
-      
+
       switch(Game.creeps[i].memory.role)
       {
-        case CREEP_ROLE.HARVESTER:
+        case Game.spawns.s1.memory.HarvesterRoleID:
         {
+          //console.log("Harvester doing - " + Game.creeps[i].memory.role );
           harvester_role.doing(Game.creeps[i]);
           break;
         }
-        case CREEP_ROLE.BUILDER:
+        case Game.spawns.s1.memory.BuilderRoleID:
         {
           builder_role.doing(Game.creeps[i]);
           break;
         }
-        case CREEP_ROLE.RCL_UPGRADER:
+        case Game.spawns.s1.memory.RclUpgraderRoleID:
         {
           rc_upgrader_role.doing(Game.creeps[i]);
-          break;
-        }
-        case CREEP_ROLE.MINERAL_HARVESTER:
-        {
           break;
         }
       }
@@ -116,20 +108,23 @@ module.exports =
   //--------------------------------------------------------------------------
   processing : function()
   {
-
     s1_tool.processing();
     
     this.check_attack();
     this.towers_doing();
     this.creeps_doing();
+       
+    //console.log(Game.spawns.s1.memory.harvester_count + " : " + harvester_max);
         
     if(Game.spawns.s1.memory.harvester_count < harvester_max)
+    {
       harvester_role.create();
-
-    if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
+    }
+    else if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
+    {
       rc_upgrader_role.create();
-      
-    if(Game.spawns.s1.memory.builder_count < builder_max)
+    }
+    else if(Game.spawns.s1.memory.builder_count < builder_max)
     {
       if(s1_tool.is_has_job_for_builder() == true)
         builder_role.create();

@@ -21,14 +21,6 @@ TOUGH           10
 */
 const SPAWN1_ID = 1;
 
-const CREEP_ROLE =
-{
-    HARVESTER         : 0
-   ,RCL_UPGRADER      : 1
-   ,BUILDER           : 2
-   ,MINERAL_HARVESTER : 3
-};
-
 const MAIN_STATE =
 {
   INIT        : 0
@@ -76,10 +68,11 @@ module.exports =
 {
   body_calc : function()
   {
-    s1_tool.energy_calculate();
+    //s1_tool.energy_calculate();
+    //var current_energy = Game.spawns.s1.memory.energyInStores;
+    
     body = [];
-
-    var current_energy = Game.spawns.s1.memory.energyInStores;
+    var current_energy = Game.rooms[Game.spawns.s1.memory.RoomID].energyAvailable;
 
     if(current_energy >= 800)
     {
@@ -111,7 +104,7 @@ module.exports =
     if(body.length > 0)
     {
       Game.spawns.s1.createCreep(body, null,
-                                        { role        : CREEP_ROLE.BUILDER
+                                        { role        : Game.spawns.s1.memory.BuilderRoleID
                                          ,type        : type
                                          ,main_state  : MAIN_STATE.INIT
                                          ,second_state: SECOND_STATE.PEACE
@@ -289,7 +282,6 @@ module.exports =
   {
     var res = builder.build(Game.getObjectById(builder.memory.buildID));
 
-    console.log(res);
     if(res == ERR_NOT_ENOUGH_RESOURCES)
     {
       this.check_and_set_to_get_energy(builder);
@@ -353,7 +345,7 @@ module.exports =
   //--------------------------------------------------------------------
   to_wait : function(builder)
   {
-    if(builder.pos.inRangeTo(builder.memory.wpx, builder.memory.wpy, 2))
+    if(builder.pos.inRangeTo(builder.memory.wpx, builder.memory.wpy, 1))
       builder.memory.main_state = MAIN_STATE.WAIT;
     else
       this.move_to_xy(builder, builder.memory.wpx, builder.memory.wpy);
@@ -361,6 +353,7 @@ module.exports =
   //--------------------------------------------------------------------
   wait : function(builder)
   {
+    console.log("builder " + builder.name + " is waiting");
     if(s1_tool.energy_is_busy(builder.memory.energyID) == false)
     {
       this.check_and_set_to_get_energy(builder);

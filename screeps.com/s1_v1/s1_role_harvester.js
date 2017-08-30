@@ -20,14 +20,6 @@ CLAIM           600
 TOUGH           10
 */
 
-const CREEP_ROLE =
-{
-    HARVESTER         : 0
-   ,RCL_UPGRADER      : 1
-   ,BUILDER           : 2
-   ,MINERAL_HARVESTER : 3
-};
-
 const MAIN_STATE =
 {
   INIT        : 0
@@ -68,10 +60,11 @@ module.exports =
 {
   body_calc : function()
   {
-      s1_tool.energy_calculate();
+      //s1_tool.energy_calculate();
+      //var current_energy = Game.spawns.s1.memory.energyInStores;
+      
       body = [];
-
-      var current_energy = Game.spawns.s1.memory.energyInStores;
+      var current_energy = Game.rooms[Game.spawns.s1.memory.RoomID].energyAvailable;
 
       if(current_energy >= 650)
       {
@@ -102,8 +95,11 @@ module.exports =
 
     if(body.length > 0)
     {
-      Game.spawns.s1.createCreep(body, null,
-                                        { role        : CREEP_ROLE.HARVESTER
+      var res;
+      if(iDM == true) console.log(iDM_HEAD + " creating of harvester " + Game.spawns.s1.memory.HarvesterRoleID);
+      
+      res = Game.spawns.s1.createCreep(body, null,
+                                        { role        : Game.spawns.s1.memory.HarvesterRoleID
                                          ,type        : type
                                          ,main_state  : MAIN_STATE.INIT
                                          ,second_state: SECOND_STATE.PEACE
@@ -114,6 +110,8 @@ module.exports =
                                          ,tick_to_full: 0
                                          ,spawn_id    : SPAWN_S1_ID
                                         });
+      
+      if(iDM == true) console.log(iDM_HEAD + " created " + res);
     }
   },
   //--------------------------------------------------------------------
@@ -344,6 +342,8 @@ module.exports =
   //--------------------------------------------------------------------
   wait : function(harvester)
   {
+    console.log("harvester " + harvester.name + " is waiting");
+
     if(s1_tool.energy_is_busy(harvester.memory.energyID) == false)
     {
       this.check_and_set_to_farm(harvester);

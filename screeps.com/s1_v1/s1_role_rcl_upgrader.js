@@ -19,14 +19,6 @@ TOUGH           10
 */
 const SPAWN_S1_ID = 1;
 
-const CREEP_ROLE =
-{
-    HARVESTER     : 0
-   ,RCL_UPGRADER  : 1
-   ,BUILDER       : 2
-   ,MINERAL_HARVESTER : 3
-};
-
 const MAIN_STATE =
 {
   INIT        : 0
@@ -54,7 +46,7 @@ const TYPE =
 };
 
 const t1_body_300 = [WORK, MOVE, CARRY, CARRY, CARRY];
-const t2_body_500 = [WORK, WORK, MOVE,  MOVE,  CARRY, CARRY, CARRY, CARRY];
+const t2_body_550 = [WORK, WORK, MOVE,  MOVE,  MOVE, CARRY, CARRY, CARRY, CARRY];
 const t3_body_750 = [WORK, WORK, WORK,  MOVE,  MOVE,  MOVE,  CARRY, CARRY, CARRY, CARRY, CARRY, CARRY];
 var   body         = [];
 
@@ -66,29 +58,30 @@ module.exports =
 {
   body_calc : function()
   {
-      s1_tool.energy_calculate();
-      body = [];
+    //s1_tool.energy_calculate();
+    //var current_energy = Game.spawns.s1.memory.energyInStores;
+    
+    body = [];
+    var current_energy = Game.rooms[Game.spawns.s1.memory.RoomID].energyAvailable;
 
-      var current_energy = Game.spawns.s1.memory.energyInStores;
-
-      if(current_energy >= 750)
-      {
-        body = t3_body_750;
-        return TYPE.T3;
-      }
-      
-      if(current_energy >= 450)
-      {
-        body = t2_body_500;
-        return TYPE.T2;
-      }
-      
-      if(current_energy >= 300)
-      {
-        body = t1_body_300;
-        return TYPE.T1;
-      }
-      return -1;
+    if(current_energy >= 750)
+    {
+      body = t3_body_750;
+      return TYPE.T3;
+    }
+    
+    if(current_energy >= 550)
+    {
+      body = t2_body_550;
+      return TYPE.T2;
+    }
+    
+    if(current_energy >= 300)
+    {
+      body = t1_body_300;
+      return TYPE.T1;
+    }
+    return -1;
   },
   //------------------------------------------------------------------------------
   create : function()
@@ -101,7 +94,7 @@ module.exports =
     if(body.length > 0)
     {
       Game.spawns.s1.createCreep(body, null,
-                                        { role        : CREEP_ROLE.RCL_UPGRADER
+                                        { role        : Game.spawns.s1.memory.RclUpgraderRoleID
                                          ,type        : type
                                          ,main_state  : MAIN_STATE.INIT
                                          ,second_state: SECOND_STATE.PEACE
@@ -135,7 +128,7 @@ module.exports =
     
     //console.log(upgrader.name + " - " + tickToLive + " : " + upgrader.memory.tick_to_full);
     
-    if(tickToLive < (upgrader.memory.tick_to_full + 40))  // 40 ????
+    if(tickToLive < (upgrader.memory.tick_to_full + 80))  // 80 ????
     {
       upgrader.memory.main_state = MAIN_STATE.SUICIDE;
       return;
@@ -260,7 +253,7 @@ module.exports =
   //--------------------------------------------------------------------
   to_wait : function(upgrader)
   {
-    if(upgrader.pos.inRangeTo(upgrader.memory.wpx, upgrader.memory.wpy, 2))
+    if(upgrader.pos.inRangeTo(upgrader.memory.wpx, upgrader.memory.wpy, 1))
       upgrader.memory.main_state = MAIN_STATE.WAIT;
     else
       this.move_to_xy(upgrader, upgrader.memory.wpx, upgrader.memory.wpy);
@@ -268,6 +261,8 @@ module.exports =
   //--------------------------------------------------------------------
   wait : function(upgrader)
   {
+    console.log("upgrader " + upgrader.name + " is waiting");
+
     if(s1_tool.energy_is_busy(upgrader.memory.energyID) == false)
     {
       this.check_and_set_to_get_energy(upgrader);
