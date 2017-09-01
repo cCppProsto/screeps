@@ -68,11 +68,10 @@ module.exports =
 {
   body_calc : function()
   {
-    //s1_tool.energy_calculate();
-    //var current_energy = Game.spawns.s1.memory.energyInStores;
-    
+    s1_tool.energy_calculate();
     body = [];
-    var current_energy = Game.rooms[Game.spawns.s1.memory.RoomID].energyAvailable;
+
+    var current_energy = Game.spawns.s1.memory.energyInStores;
 
     if(current_energy >= 800)
     {
@@ -282,6 +281,7 @@ module.exports =
   {
     var res = builder.build(Game.getObjectById(builder.memory.buildID));
 
+    console.log(res);
     if(res == ERR_NOT_ENOUGH_RESOURCES)
     {
       this.check_and_set_to_get_energy(builder);
@@ -345,7 +345,7 @@ module.exports =
   //--------------------------------------------------------------------
   to_wait : function(builder)
   {
-    if(builder.pos.inRangeTo(builder.memory.wpx, builder.memory.wpy, 1))
+    if(builder.pos.inRangeTo(builder.memory.wpx, builder.memory.wpy, 2))
       builder.memory.main_state = MAIN_STATE.WAIT;
     else
       this.move_to_xy(builder, builder.memory.wpx, builder.memory.wpy);
@@ -353,7 +353,6 @@ module.exports =
   //--------------------------------------------------------------------
   wait : function(builder)
   {
-    if(iDM == true) console.log("builder " + builder.name + " is waiting");
     if(s1_tool.energy_is_busy(builder.memory.energyID) == false)
     {
       this.check_and_set_to_get_energy(builder);

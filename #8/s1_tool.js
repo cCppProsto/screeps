@@ -66,12 +66,11 @@ const BUILDER_SECOND_STATE =
  ,BASE_IS_ATTACKED  : 1
 };
 
-
 //Game.spawns.s1.memory.memoryReinit     = true;
 //Game.spawns.s1.memory.forceRecalculate = true;
 
 const gcWallHitsAmount          = 100000; // 100k
-const gcRampartHitsAmount       = 150000; // 150k
+const gcRampartHitsAmount       = 200000; // 200k
 const gcCountTickForAttackCheck = 10;
 
 //----------------------------------------------------------------------
@@ -116,24 +115,24 @@ module.exports =
       
       Game.spawns.s1.memory.RoomID = "E47S12";
       
-      Game.spawns.s1.memory.energyID_0 = "59830097b097071b4adc4983";
+      Game.spawns.s1.memory.energyID_0 = "68050773313e4cb";
       Game.spawns.s1.memory.energyID_0_pos = [];
-      Game.spawns.s1.memory.energyID_0_pos[0] = 23; // x
-      Game.spawns.s1.memory.energyID_0_pos[1] = 37; // y
-      Game.spawns.s1.memory.energyID_0_max_creeps = 3;
+      Game.spawns.s1.memory.energyID_0_pos[0] = 14; // x
+      Game.spawns.s1.memory.energyID_0_pos[1] = 13; // y
+      Game.spawns.s1.memory.energyID_0_max_creeps = 4;
       Game.spawns.s1.memory.energyID_0_wait_pos = [];
-      Game.spawns.s1.memory.energyID_0_wait_pos[0] = 21; // x
-      Game.spawns.s1.memory.energyID_0_wait_pos[1] = 32; // y
+      Game.spawns.s1.memory.energyID_0_wait_pos[0] = 17; // x
+      Game.spawns.s1.memory.energyID_0_wait_pos[1] = 11; // y
       Game.spawns.s1.memory.energyID_0_gath_count = 0;
 
-      Game.spawns.s1.memory.energyID_1 = "59830097b097071b4adc4984";
+      Game.spawns.s1.memory.energyID_1 = "9fa9077331385d3";
       Game.spawns.s1.memory.energyID_1_pos = [];
-      Game.spawns.s1.memory.energyID_1_pos[0] = 41; // x
-      Game.spawns.s1.memory.energyID_1_pos[1] = 45; // y
-      Game.spawns.s1.memory.energyID_1_max_creeps  = 2;
+      Game.spawns.s1.memory.energyID_1_pos[0] = 11; // x
+      Game.spawns.s1.memory.energyID_1_pos[1] = 25; // y
+      Game.spawns.s1.memory.energyID_1_max_creeps  = 3;
       Game.spawns.s1.memory.energyID_1_wait_pos    = [];
-      Game.spawns.s1.memory.energyID_1_wait_pos[0] = 46; // x
-      Game.spawns.s1.memory.energyID_1_wait_pos[1] = 41; // y
+      Game.spawns.s1.memory.energyID_1_wait_pos[0] = 9; // x
+      Game.spawns.s1.memory.energyID_1_wait_pos[1] = 22; // y
       Game.spawns.s1.memory.energyID_1_gath_count = 0;
       // ENERGY <<
       
@@ -637,20 +636,6 @@ module.exports =
         var road = Game.getObjectById(Game.spawns.s1.memory.rpr_roads[i]);
         if(road.hits < road.hitsMax)
           return Game.spawns.s1.memory.rpr_roads[i];
-      }
-    }
-    return "";
-  },
-  //--------------------------------------------------------------------------
-  get_repair_rampart_id : function()
-  {
-    if(Game.spawns.s1.memory.rpr_ramparts.length > 0)
-    {
-      for(var i in Game.spawns.s1.memory.rpr_ramparts)
-      {
-        var ram_part = Game.getObjectById(Game.spawns.s1.memory.rpr_ramparts[i]);
-        if(ram_part.hits < ram_part.hitsMax)
-          return Game.spawns.s1.memory.rpr_ramparts[i];
       }
     }
     return "";

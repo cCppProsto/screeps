@@ -15,7 +15,7 @@ const eDM_HEAD = "S1_CREEP_PROC[ERROR] ";
 const SPAWN_S1_ID = 1;
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 
-var harvester_max      = 4;
+var harvester_max      = 6;
 var rc_upgrader_max    = 4;
 var builder_max        = 3;
 
@@ -92,21 +92,9 @@ module.exports =
         {
           case '0':
           {
-            var id = "";
-            
-            id = s1_tool.get_repair_rampart_id();
+            var id = s1_tool.get_repair_road_id();
             if(id.length > 0)
-            {
               tower.repair(Game.getObjectById(id));
-              return;
-            }
-            
-            id = s1_tool.get_repair_road_id();
-            if(id.length > 0)
-            {
-              tower.repair(Game.getObjectById(id));
-              return;
-            }
             break;
           }
           case '1':
@@ -131,15 +119,22 @@ module.exports =
     if(Game.spawns.s1.memory.harvester_count < harvester_max)
     {
       harvester_role.create();
+      return;
     }
-    else if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
+
+    if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
     {
       rc_upgrader_role.create();
+      return;
     }
-    else if(Game.spawns.s1.memory.builder_count < builder_max)
+      
+    if(Game.spawns.s1.memory.builder_count < builder_max)
     {
       if(s1_tool.is_has_job_for_builder() == true)
+      {
         builder_role.create();
+        return;
+      }
     }
   }
 };

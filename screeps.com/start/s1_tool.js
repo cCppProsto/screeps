@@ -9,18 +9,21 @@ var WALL_HITS_AMOUNT    = 100000; // 100k
 var RAMPART_HITS_AMOUNT = 200000; // 200k
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 
-//Game.spawns.s1.memory.energyResourcesID_0_Pos = [];
-//Game.spawns.s1.memory.m1_energyResourcesID_0_Current = 0;
-//Game.spawns.s1.memory.m2_energyResourcesID_0_Current = 0;
+Game.spawns.s1.memory.energyResourcesID_0_Pos = [];
+Game.spawns.s1.memory.energyResourcesID[0] = [];
+Game.spawns.s1.memory.m1_energyResourcesID_0_Current = 0;
+Game.spawns.s1.memory.m2_energyResourcesID_0_Current = 0;
+Game.spawns.s1.memory.energyResourcesID = [];
 Game.spawns.s1.memory.energyResourcesID[0] = '5982fc8db097071b4adbdb6e';
 Game.spawns.s1.memory.energyResourcesID_0_Max = 3;
 Game.spawns.s1.memory.energyResourcesID_0_Pos[0] = 5; // X
 Game.spawns.s1.memory.energyResourcesID_0_Pos[1] = 11; // Y
 
 
-//Game.spawns.s1.memory.energyResourcesID_1_Pos = [];
-//Game.spawns.s1.memory.m1_energyResourcesID_1_Current = 0;
-//Game.spawns.s1.memory.m2_energyResourcesID_1_Current = 0;
+Game.spawns.s1.memory.energyResourcesID_1_Pos = [];
+Game.spawns.s1.memory.m1_energyResourcesID_1_Current = 0;
+Game.spawns.s1.memory.m2_energyResourcesID_1_Current = 0;
+Game.spawns.s1.memory.energyResourcesID = [];
 Game.spawns.s1.memory.energyResourcesID[1] = '5982fc8db097071b4adbdb6f';
 Game.spawns.s1.memory.energyResourcesID_1_Max = 2;
 Game.spawns.s1.memory.energyResourcesID_1_Pos[0] = 10; // X
