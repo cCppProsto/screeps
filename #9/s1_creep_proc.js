@@ -3,6 +3,8 @@ var harvester_role    = require('s1_role_harvester');
 var rc_upgrader_role  = require('s1_role_rcl_upgrader');
 var builder_role      = require('s1_role_builder');
 
+var colonizator_role      = require('s1_colonizators');
+
 // for debug messages
 var iDM = false;
 var eDM = true; 
@@ -15,7 +17,7 @@ const eDM_HEAD = "S1_CREEP_PROC[ERROR] ";
 const SPAWN_S1_ID = 1;
 var COUNT_TICKS_FOR_ATTACK_CHECK = 10;
 
-var harvester_max      = 6;
+var harvester_max      = 5;
 var rc_upgrader_max    = 4;
 var builder_max        = 3;
 
@@ -36,7 +38,6 @@ module.exports =
       {
         case Game.spawns.s1.memory.HarvesterRoleID:
         {
-          //console.log("Harvester doing - " + Game.creeps[i].memory.role );
           harvester_role.doing(Game.creeps[i]);
           break;
         }
@@ -131,15 +132,26 @@ module.exports =
     if(Game.spawns.s1.memory.harvester_count < harvester_max)
     {
       harvester_role.create();
+      return;
     }
-    else if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
+    
+    
+    colonizator_role.doing();
+    if(Game.spawns.s1.memory.colonizeIsDoing == true)  
+      return;
+    
+    if(Game.spawns.s1.memory.rcl_upgrader_count < rc_upgrader_max)
     {
       rc_upgrader_role.create();
+      return;
     }
-    else if(Game.spawns.s1.memory.builder_count < builder_max)
+    if(Game.spawns.s1.memory.builder_count < builder_max)
     {
       if(s1_tool.is_has_job_for_builder() == true)
+      {
         builder_role.create();
+        return;
+      }
     }
   }
 };
